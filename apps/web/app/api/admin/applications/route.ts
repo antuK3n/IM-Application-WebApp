@@ -10,6 +10,7 @@ export async function GET() {
         SELECT 
           a.Applicant_ID,
           a.Applicant_Name,
+          a.Applicant_Address,
           a.Contact_Number,
           a.Age,
           a.Sex,
