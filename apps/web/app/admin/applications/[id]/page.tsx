@@ -16,7 +16,6 @@ interface Application {
   state: string;
   zipCode: string;
   country: string;
-  status: string;
 }
 
 export default function EditApplication() {
@@ -38,8 +37,7 @@ export default function EditApplication() {
       city: 'New York',
       state: 'NY',
       zipCode: '10001',
-      country: 'USA',
-      status: 'Pending',
+      country: 'USA'
     };
 
     setApplication(mockApplication);
@@ -190,27 +188,6 @@ export default function EditApplication() {
                 value={application.country}
                 onChange={handleChange}
               />
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.formSection}>
-          <h3 className={styles.sectionTitle}>Status</h3>
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="status">Application Status</label>
-              <select
-                id="status"
-                name="status"
-                value={application.status}
-                onChange={handleChange}
-              >
-                <option value="Pending">Pending</option>
-                <option value="Under Review">Under Review</option>
-                <option value="Interview">Interview</option>
-                <option value="Offered">Offered</option>
-                <option value="Rejected">Rejected</option>
-              </select>
             </div>
           </div>
         </div>

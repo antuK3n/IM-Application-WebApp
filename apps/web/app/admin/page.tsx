@@ -8,7 +8,6 @@ interface Application {
   position: string;
   name: string;
   email: string;
-  status: 'pending' | 'reviewed' | 'rejected';
   submittedAt: string;
 }
 
@@ -19,7 +18,6 @@ export default function AdminDashboard() {
       position: 'Software Engineer',
       name: 'John Doe',
       email: 'john@example.com',
-      status: 'pending',
       submittedAt: '2024-03-20'
     },
     {
@@ -27,17 +25,13 @@ export default function AdminDashboard() {
       position: 'Product Manager',
       name: 'Jane Smith',
       email: 'jane@example.com',
-      status: 'reviewed',
       submittedAt: '2024-03-19'
     }
   ]);
 
-  const handleStatusChange = (id: number, newStatus: Application['status']) => {
-    setApplications(prev => 
-      prev.map(app => 
-        app.id === id ? { ...app, status: newStatus } : app
-      )
-    );
+  const handleEdit = (id: number) => {
+    // TODO: Implement edit functionality
+    console.log('Edit application:', id);
   };
 
   const handleDelete = (id: number) => {
@@ -66,7 +60,6 @@ export default function AdminDashboard() {
                 <th>Position</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Status</th>
                 <th>Submitted</th>
                 <th>Actions</th>
               </tr>
@@ -78,19 +71,14 @@ export default function AdminDashboard() {
                   <td>{app.position}</td>
                   <td>{app.name}</td>
                   <td>{app.email}</td>
-                  <td>
-                    <select
-                      value={app.status}
-                      onChange={(e) => handleStatusChange(app.id, e.target.value as Application['status'])}
-                      className={styles.statusSelect}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="reviewed">Reviewed</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                  </td>
                   <td>{app.submittedAt}</td>
                   <td>
+                    <button
+                      onClick={() => handleEdit(app.id)}
+                      className={styles.editButton}
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => handleDelete(app.id)}
                       className={styles.deleteButton}
