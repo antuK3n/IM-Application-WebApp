@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       const token = Buffer.from(`${username}:${Date.now()}`).toString("base64");
 
       // Set the token in an HTTP-only cookie
-      cookies().set("adminToken", token, {
+      (await cookies()).set("adminToken", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
