@@ -1,16 +1,7 @@
+import { Instrument_Sans } from "next/font/google";
 import './globals.css';
-import { ThemeProvider } from './context/ThemeContext';
-import localFont from 'next/font/local';
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-});
-
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-});
+const instrumentSans = Instrument_Sans({ subsets: ['latin'] });
 
 export default function RootLayout({
   children,
@@ -18,11 +9,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={geistSans.variable}>
-      <body className={geistMono.variable}>
-        <ThemeProvider>
+    <html lang="en">
+      <body className={instrumentSans.className}>
           {children}
-        </ThemeProvider>
       </body>
     </html>
   );
