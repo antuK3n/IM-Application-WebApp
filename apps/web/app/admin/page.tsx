@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './admin.module.css';
+import Link from 'next/link';
 
 interface Application {
   Applicant_ID: string;
@@ -153,13 +154,16 @@ export default function AdminPage() {
   return (
     <div className={styles.adminLayout}>
       <aside className={styles.sidebar}>
-        <div className={styles.logo}>
-          Job Application Portal
-        </div>
+
         <nav className={styles.navLinks}>
-          <a href="/admin" className={styles.active}>Dashboard</a>
-          <a href="/admin/applications">Applications</a>
-          <a href="/admin/settings">Settings</a>
+          <Link href="/admin" className={styles.active}>
+            <i className="fi fi-br-document"></i>
+            <span>Applications</span>
+          </Link>
+          <Link href="/">
+            <i className="fi fi-br-home"></i>
+            <span>Home</span>
+          </Link>
         </nav>
       </aside>
       <main className={styles.main}>

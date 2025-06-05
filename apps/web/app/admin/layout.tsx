@@ -8,8 +8,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={styles.adminLayout}>
-      {children}
-    </div>
+    <>
+      <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css' />
+      <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-straight/css/uicons-bold-straight.css' />
+      <div className={styles.adminLayout}>
+        {children}
+      </div>
+    </>
   );
 } 

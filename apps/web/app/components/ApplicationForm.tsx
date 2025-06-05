@@ -33,7 +33,6 @@ export default function ApplicationForm() {
     <div className={styles.formContainer}>
       <Formik
         initialValues={{
-          applicantId: '001',
           name: '',
           address: '',
           contactNumber: '',
@@ -69,6 +68,10 @@ export default function ApplicationForm() {
               throw new Error(data.error || 'Failed to submit application');
             }
 
+            // Store the applicant ID and control number in session storage
+            sessionStorage.setItem('applicantId', data.applicantId);
+            sessionStorage.setItem('controlNumber', data.controlNumber);
+
             router.push('/success');
           } catch (error) {
             setMessage({
@@ -80,7 +83,7 @@ export default function ApplicationForm() {
           }
         }}
       >
-        {({ isSubmitting }) => (
+        {({ values }) => (
           <Form className={styles.form}>
             {message && (
               <div className={`${styles.message} ${styles[message.type]}`}>
@@ -90,11 +93,6 @@ export default function ApplicationForm() {
 
             <div className={styles.formSection}>
               <h2>Personal Information</h2>
-              <div className={styles.formGroup}>
-                <label htmlFor="applicantId">Applicant ID</label>
-                <Field type="text" id="applicantId" name="applicantId" disabled />
-              </div>
-
               <div className={styles.formGroup}>
                 <label htmlFor="name">Full Name</label>
                 <Field type="text" id="name" name="name" />

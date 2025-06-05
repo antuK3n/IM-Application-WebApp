@@ -2,8 +2,21 @@
 
 import Link from 'next/link';
 import styles from '../page.module.css';
+import { useEffect, useState } from 'react';
 
 export default function SuccessPage() {
+  const [applicantId, setApplicantId] = useState<string | null>(null);
+  const [controlNumber, setControlNumber] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get the stored values from session storage
+    const storedApplicantId = sessionStorage.getItem('applicantId');
+    const storedControlNumber = sessionStorage.getItem('controlNumber');
+    
+    if (storedApplicantId) setApplicantId(storedApplicantId);
+    if (storedControlNumber) setControlNumber(storedControlNumber);
+  }, []);
+
   return (
     <div className={styles.page}>
       <div className={styles.main}>
@@ -13,6 +26,22 @@ export default function SuccessPage() {
             <p style={{ textAlign: 'center', marginBottom: 'var(--spacing-md)' }}>
               Thank you for submitting your application. We will review it and get back to you soon.
             </p>
+            {applicantId && controlNumber && (
+              <div style={{ 
+                textAlign: 'center', 
+                marginBottom: 'var(--spacing-md)',
+                padding: 'var(--spacing-md)',
+                backgroundColor: '#222',
+                borderRadius: '4px'
+              }}>
+                <p style={{ marginBottom: 'var(--spacing-sm)' }}>
+                  <strong>Applicant ID:</strong> {applicantId}
+                </p>
+                <p>
+                  <strong>Control Number:</strong> {controlNumber}
+                </p>
+              </div>
+            )}
             <div className={styles.ctas}>
               <Link href="/apply" className={styles.primary}>
                 Submit Another Application
