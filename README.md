@@ -1,84 +1,179 @@
-# Turborepo starter
+# Job Application Portal
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack job application management system built with Next.js and MySQL, using Turborepo for monorepo management.
 
-## Using this example
+## Tech Stack
 
-Run the following command:
+- **Frontend**:
 
-```sh
-npx create-turbo@latest
+  - Next.js 15
+  - React 19
+  - TypeScript
+  - Formik & Yup for form handling
+  - CSS Modules for styling
+
+- **Backend**:
+
+  - Next.js API Routes
+  - MySQL Database
+  - mysql2 for database connection
+
+- **Authentication**:
+
+  - Custom admin authentication
+  - HTTP-only cookies for session management
+
+- **Build Tools**:
+  - Turborepo for monorepo management
+  - Yarn for package management
+
+## Features
+
+- Job application submission form
+- Admin dashboard for managing applications
+- Secure admin authentication
+- Application sorting and filtering
+- Responsive design with dark theme
+- Form validation
+- Real-time application status updates
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+yarn install
 ```
 
-## What's inside?
+3. Set up your environment variables in `apps/web/.env`:
 
-This Turborepo includes the following packages/apps:
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=jobapplication
 
-### Apps and Packages
+# Application Configuration
+NEXT_PUBLIC_APP_NAME="Job Application Portal"
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_secure_password
 ```
 
-### Develop
+4. Set up the MySQL database:
 
-To develop all apps and packages, run the following command:
+```sql
+CREATE DATABASE jobapplication;
+USE jobapplication;
+
+CREATE TABLE applicant_info (
+  Applicant_ID VARCHAR(3) PRIMARY KEY,
+  Applicant_Name VARCHAR(100) NOT NULL,
+  Applicant_Address TEXT NOT NULL,
+  Contact_Number VARCHAR(20) NOT NULL,
+  Age INT NOT NULL,
+  Sex CHAR(1) NOT NULL
+);
+
+CREATE TABLE application_info (
+  ApplicantForm_ID VARCHAR(3) PRIMARY KEY,
+  Applicant_ID VARCHAR(3) NOT NULL,
+  Control_Number VARCHAR(6) NOT NULL,
+  Position_Applied VARCHAR(100) NOT NULL,
+  Salary_Desired DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (Applicant_ID) REFERENCES applicant_info(Applicant_ID)
+);
+
+CREATE TABLE education_info (
+  Student_ID VARCHAR(3) PRIMARY KEY,
+  Applicant_ID VARCHAR(3) NOT NULL,
+  Educational_Attainment VARCHAR(100) NOT NULL,
+  Institution_Name VARCHAR(100) NOT NULL,
+  Year_Graduated INT NOT NULL,
+  Honors VARCHAR(100),
+  FOREIGN KEY (Applicant_ID) REFERENCES applicant_info(Applicant_ID)
+);
+
+CREATE TABLE job_info (
+  Employment_ID VARCHAR(3) PRIMARY KEY,
+  Applicant_ID VARCHAR(3) NOT NULL,
+  Company_Name VARCHAR(100) NOT NULL,
+  Company_Location VARCHAR(100) NOT NULL,
+  Position VARCHAR(100) NOT NULL,
+  Salary DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (Applicant_ID) REFERENCES applicant_info(Applicant_ID)
+);
+```
+
+5. Run the development server:
+
+```bash
+yarn dev
+```
+
+## Project Structure
 
 ```
-cd my-turborepo
-pnpm dev
+apps/web/
+├── app/
+│   ├── admin/           # Admin dashboard
+│   ├── api/             # API routes
+│   ├── apply/           # Application form
+│   └── success/         # Success page
+├── components/          # Shared components
+├── lib/                 # Database and utilities
+└── styles/             # Global styles
 ```
 
-### Remote Caching
+## Security Considerations
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+- Admin credentials are stored in environment variables
+- HTTP-only cookies for session management
+- Form validation on both client and server
+- SQL injection prevention using parameterized queries
+- XSS protection through proper input sanitization
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+## Development
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+- `yarn dev` - Start development server
+- `yarn build` - Build for production
+- `yarn start` - Start production server
+- `yarn lint` - Run ESLint
+- `yarn check-types` - Run TypeScript type checking
 
+## Turborepo Features
+
+This project uses Turborepo for efficient monorepo management:
+
+- Shared TypeScript configurations
+- Shared ESLint configurations
+- Optimized build caching
+- Parallel task execution
+- Workspace management
+
+## Deployment
+
+1. Set up your production environment variables
+2. Build the application:
+
+```bash
+yarn build
 ```
-cd my-turborepo
-npx turbo login
+
+3. Start the production server:
+
+```bash
+yarn start
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Contributing
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
