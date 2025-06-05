@@ -1,237 +1,207 @@
-import { Formik, Form, Field } from 'formik';
+'use client';
+
+import { useState } from 'react';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import styles from '../page.module.css';
+import { useRouter } from 'next/navigation';
+
+const validationSchema = Yup.object({
+  name: Yup.string().required('Name is required'),
+  address: Yup.string().required('Address is required'),
+  contactNumber: Yup.string().required('Contact number is required'),
+  age: Yup.number().required('Age is required').min(18, 'Must be at least 18 years old'),
+  sex: Yup.string().required('Sex is required'),
+  positionApplied: Yup.string().required('Position applied is required'),
+  salaryDesired: Yup.number().required('Salary desired is required'),
+  educationalAttainment: Yup.string().required('Educational attainment is required'),
+  institutionName: Yup.string().required('Institution name is required'),
+  yearGraduated: Yup.number().required('Year graduated is required'),
+  honors: Yup.string(),
+  companyName: Yup.string().required('Company name is required'),
+  companyLocation: Yup.string().required('Company location is required'),
+  position: Yup.string().required('Position is required'),
+  salary: Yup.number().required('Salary is required'),
+});
 
 export default function ApplicationForm() {
+  const router = useRouter();
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   return (
     <div className={styles.formContainer}>
       <Formik
         initialValues={{
-          source: '',
-          position1: '',
-          position2: '',
-          salary: '',
-          surname: '',
-          firstName: '',
-          middleName: '',
-          nickname: '',
-          presentAddress: '',
-          provincialAddress: '',
-          contactTel: '',
-          contactCell: '',
-          contactEmail: '',
+          applicantId: '001',
+          name: '',
+          address: '',
+          contactNumber: '',
           age: '',
-          birthdate: '',
-          birthplace: '',
           sex: '',
-          height: '',
-          weight: '',
-          sss: '',
-          pagibig: '',
-          tin: '',
-          gsis: '',
-          philhealth: '',
-          civilStatus: '',
-          residence: '',
-          languages: '',
-          hobbies: '',
-          skills: '',
-          qualifications: '',
-          willingToAssign: '',
-          preferredLocation: '',
+          positionApplied: '',
+          salaryDesired: '',
+          educationalAttainment: '',
+          institutionName: '',
+          yearGraduated: '',
+          honors: '',
+          companyName: '',
+          companyLocation: '',
+          position: '',
+          salary: ''
         }}
-        onSubmit={(values) => {
-          console.log('Form submitted:', values);
+        validationSchema={validationSchema}
+        onSubmit={async (values) => {
+          setIsSubmitting(true);
+          setMessage(null);
+          try {
+            const response = await fetch('/api/applications', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(values),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to submit application');
+            }
+
+            router.push('/success');
+          } catch (error) {
+            setMessage({
+              type: 'error',
+              text: error instanceof Error ? error.message : 'Failed to submit application',
+            });
+          } finally {
+            setIsSubmitting(false);
+          }
         }}
       >
         {({ isSubmitting }) => (
-          <Form>
-            <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Application Information</h2>
-              <div className={styles.formGroup}>
-                <label>Source</label>
-                <Field name="source" placeholder="Website / Walk-in / Jobfair / Referral" />
+          <Form className={styles.form}>
+            {message && (
+              <div className={`${styles.message} ${styles[message.type]}`}>
+                {message.text}
               </div>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Position Applied For (1st Choice)</label>
-                  <Field name="position1" placeholder="1st Choice" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Position Applied For (2nd Choice)</label>
-                  <Field name="position2" placeholder="2nd Choice" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Salary Desired</label>
-                  <Field name="salary" placeholder="Salary Desired" />
-                </div>
+            )}
+
+            <div className={styles.formSection}>
+              <h2>Personal Information</h2>
+              <div className={styles.formGroup}>
+                <label htmlFor="applicantId">Applicant ID</label>
+                <Field type="text" id="applicantId" name="applicantId" disabled />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="name">Full Name</label>
+                <Field type="text" id="name" name="name" />
+                <ErrorMessage name="name" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="address">Address</label>
+                <Field type="text" id="address" name="address" />
+                <ErrorMessage name="address" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="contactNumber">Contact Number</label>
+                <Field type="text" id="contactNumber" name="contactNumber" />
+                <ErrorMessage name="contactNumber" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="age">Age</label>
+                <Field type="number" id="age" name="age" />
+                <ErrorMessage name="age" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="sex">Sex</label>
+                <Field as="select" id="sex" name="sex">
+                  <option value="">Select</option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                </Field>
+                <ErrorMessage name="sex" component="div" className={styles.error} />
               </div>
             </div>
 
             <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Personal Information</h2>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Surname</label>
-                  <Field name="surname" placeholder="Surname" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>First Name</label>
-                  <Field name="firstName" placeholder="First Name" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Middle Name</label>
-                  <Field name="middleName" placeholder="Middle Name" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Nickname</label>
-                  <Field name="nickname" placeholder="Nickname" />
-                </div>
+              <h2>Application Details</h2>
+              <div className={styles.formGroup}>
+                <label htmlFor="positionApplied">Position Applied</label>
+                <Field type="text" id="positionApplied" name="positionApplied" />
+                <ErrorMessage name="positionApplied" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="salaryDesired">Salary Desired</label>
+                <Field type="number" id="salaryDesired" name="salaryDesired" />
+                <ErrorMessage name="salaryDesired" component="div" className={styles.error} />
               </div>
             </div>
 
             <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Contact Information</h2>
+              <h2>Educational Background</h2>
               <div className={styles.formGroup}>
-                <label>Present Address</label>
-                <Field name="presentAddress" placeholder="Full Address" />
+                <label htmlFor="educationalAttainment">Educational Attainment</label>
+                <Field type="text" id="educationalAttainment" name="educationalAttainment" />
+                <ErrorMessage name="educationalAttainment" component="div" className={styles.error} />
               </div>
+
               <div className={styles.formGroup}>
-                <label>Provincial Address</label>
-                <Field name="provincialAddress" placeholder="Full Address" />
+                <label htmlFor="institutionName">Institution Name</label>
+                <Field type="text" id="institutionName" name="institutionName" />
+                <ErrorMessage name="institutionName" component="div" className={styles.error} />
               </div>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Telephone</label>
-                  <Field name="contactTel" placeholder="Telephone" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Cellphone</label>
-                  <Field name="contactCell" placeholder="Cellphone" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Email</label>
-                  <Field name="contactEmail" placeholder="Email" />
-                </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="yearGraduated">Year Graduated</label>
+                <Field type="number" id="yearGraduated" name="yearGraduated" />
+                <ErrorMessage name="yearGraduated" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="honors">Honors/Awards</label>
+                <Field type="text" id="honors" name="honors" />
+                <ErrorMessage name="honors" component="div" className={styles.error} />
               </div>
             </div>
 
             <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Personal Details</h2>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Age</label>
-                  <Field name="age" placeholder="Age" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Birthdate</label>
-                  <Field name="birthdate" placeholder="Birthdate" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Birthplace</label>
-                  <Field name="birthplace" placeholder="Birthplace" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Sex</label>
-                  <Field name="sex" placeholder="Sex" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Height</label>
-                  <Field name="height" placeholder="Height" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Weight</label>
-                  <Field name="weight" placeholder="Weight" />
-                </div>
+              <h2>Previous Employment</h2>
+              <div className={styles.formGroup}>
+                <label htmlFor="companyName">Company Name</label>
+                <Field type="text" id="companyName" name="companyName" />
+                <ErrorMessage name="companyName" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="companyLocation">Company Location</label>
+                <Field type="text" id="companyLocation" name="companyLocation" />
+                <ErrorMessage name="companyLocation" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="position">Position</label>
+                <Field type="text" id="position" name="position" />
+                <ErrorMessage name="position" component="div" className={styles.error} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="salary">Salary</label>
+                <Field type="number" id="salary" name="salary" />
+                <ErrorMessage name="salary" component="div" className={styles.error} />
               </div>
             </div>
 
-            <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Government IDs</h2>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>SSS No.</label>
-                  <Field name="sss" placeholder="SSS No." />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Pag-ibig No.</label>
-                  <Field name="pagibig" placeholder="Pag-ibig No." />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>TIN</label>
-                  <Field name="tin" placeholder="TIN" />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>GSIS No.</label>
-                  <Field name="gsis" placeholder="GSIS No." />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Philhealth No.</label>
-                  <Field name="philhealth" placeholder="Philhealth No." />
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Additional Information</h2>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Civil Status</label>
-                  <Field as="select" name="civilStatus">
-                    <option value="">Select</option>
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Annulled">Annulled</option>
-                    <option value="Separated">Separated</option>
-                    <option value="Widowed">Widowed</option>
-                  </Field>
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Residence Type</label>
-                  <Field as="select" name="residence">
-                    <option value="">Select</option>
-                    <option value="Own">Staying at own house</option>
-                    <option value="Renting">Renting</option>
-                    <option value="Relatives">Staying with Relatives</option>
-                  </Field>
-                </div>
-              </div>
-              <div className={styles.formGroup}>
-                <label>Languages / Dialects Spoken</label>
-                <Field name="languages" />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Interests / Hobbies</label>
-                <Field name="hobbies" />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Other Skills</label>
-                <Field name="skills" placeholder="Can operate/use machines/software/etc." />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Qualifications / Articles / Books</label>
-                <Field name="qualifications" />
-              </div>
-            </div>
-
-            <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Assignment Preferences</h2>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Willing to be assigned in province?</label>
-                  <Field as="select" name="willingToAssign">
-                    <option value="">Select</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </Field>
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Preferred Location</label>
-                  <Field name="preferredLocation" placeholder="If yes, preferred location" />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" disabled={isSubmitting}>Submit Application</button>
+            <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            </button>
           </Form>
         )}
       </Formik>
