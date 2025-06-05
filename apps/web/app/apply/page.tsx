@@ -8,7 +8,7 @@ export default function ApplicationPage() {
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Application for Employment
+          boo jumpscare 
         </h1>
         <ApplicationForm />
       </main>
