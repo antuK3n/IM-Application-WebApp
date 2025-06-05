@@ -1,6 +1,32 @@
 :root {
+  /* Light mode colors */
   --background: #ffffff;
   --foreground: #171717;
+  --section-bg: #f8f9fa;
+  --border-color: #e9ecef;
+  --input-bg: #ffffff;
+  --input-border: #dee2e6;
+  --input-focus-border: #0d6efd;
+  --button-bg: #0d6efd;
+  --button-hover: #0b5ed7;
+  --button-text: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+}
+
+html.darkMode {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --section-bg: #1a1a1a;
+  --border-color: #2d2d2d;
+  --input-bg: #1a1a1a;
+  --input-border: #2d2d2d;
+  --input-focus-border: #3b82f6;
+  --button-bg: #3b82f6;
+  --button-hover: #2563eb;
+  --button-text: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -12,13 +38,27 @@
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+/* Light mode */
+body {
+  background-color: #ffffff;
+  color: #212529;
+}
+
+/* Dark mode */
+html.darkMode body {
+  background-color: #0a0a0a;
+  color: #ffffff;
 }
 
 * {
@@ -47,4 +87,17 @@ a {
   .imgDark {
     display: unset;
   }
+}
+
+/* Form section styles */
+.formSection {
+  background-color: var(--section-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.darkMode .formSection {
+  background-color: #1a1a1a;
+  border-color: #2d2d2d;
+  color: #ffffff;
 }

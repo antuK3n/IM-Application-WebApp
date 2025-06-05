@@ -19,19 +19,34 @@
 
   width: 100%;
   min-height: 100vh;
-  background: var(--background);
   padding: 0;
   margin: 0;
+  color: var(--text-primary);
+  transition: color var(--transition-duration) ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  .page {
-    --gray-rgb: 255, 255, 255;
-    --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
-    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-  }
+.themeToggle {
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-duration) ease;
+  z-index: 1000;
+}
+
+.themeToggle:hover {
+  transform: scale(1.1);
+  border-color: var(--input-focus-border);
 }
 
 .main {
@@ -225,10 +240,10 @@ button.secondary {
   font-size: var(--font-size-lg);
   font-weight: 600;
   text-align: center;
-  color: var(--foreground);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-xs);
-  border-bottom: 2px solid var(--gray-alpha-200);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .formContainer {
@@ -246,20 +261,26 @@ button.secondary {
   display: grid;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  background: var(--gray-alpha-100);
+  background-color: var(--section-bg);
   border-radius: var(--border-radius);
-  border: 1px solid var(--gray-alpha-200);
+  border: 1px solid var(--border-color);
   width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background-color var(--transition-duration) ease,
+              border-color var(--transition-duration) ease,
+              box-shadow var(--transition-duration) ease;
 }
 
 .sectionTitle {
   font-family: var(--font-geist-sans);
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--foreground);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
   padding-bottom: var(--spacing-xs);
-  border-bottom: 1px solid var(--gray-alpha-200);
+  border-bottom: 1px solid var(--border-color);
+  transition: color var(--transition-duration) ease,
+              border-color var(--transition-duration) ease;
 }
 
 .formRow {
@@ -279,33 +300,40 @@ button.secondary {
   font-family: var(--font-geist-sans);
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--foreground);
+  color: var(--text-secondary);
+  transition: color var(--transition-duration) ease;
 }
 
 .formContainer input,
 .formContainer select {
   width: 100%;
   padding: var(--spacing-sm);
-  border: 1px solid var(--gray-alpha-200);
+  border: 1px solid var(--input-border);
   border-radius: var(--border-radius);
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
   font-family: var(--font-geist-sans);
   font-size: var(--font-size-base);
-  transition: border-color var(--transition-duration) ease;
+  transition: all var(--transition-duration) ease;
+}
+
+.formContainer input:hover,
+.formContainer select:hover {
+  border-color: var(--text-secondary);
 }
 
 .formContainer input:focus,
 .formContainer select:focus {
   outline: none;
-  border-color: var(--foreground);
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
 
 .formContainer button[type="submit"] {
   margin-top: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--button-bg);
+  color: var(--button-text);
   border: none;
   border-radius: var(--border-radius);
   font-family: var(--font-geist-sans);
@@ -320,12 +348,24 @@ button.secondary {
 }
 
 .formContainer button[type="submit"]:hover {
-  background: var(--button-primary-hover);
+  background: var(--button-hover);
   transform: translateY(-1px);
 }
 
 .formContainer button[type="submit"]:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  background: var(--text-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .formSection {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .formContainer input:focus,
+  .formContainer select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
 }
 
