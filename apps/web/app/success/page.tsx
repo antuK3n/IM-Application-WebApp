@@ -47,7 +47,7 @@ export default function SuccessPage() {
           <div className={styles.formSection}>
             <h1 className={styles.title}>Application Submitted!</h1>
             <p style={{ textAlign: 'center', marginBottom: 'var(--spacing-md)' }}>
-              Thank you for submitting your application. We will review it and get back to you soon.
+              Thank you for submitting your application. Reviewhin ko bukas trust
             </p>
             {applicantId && controlNumber && (
               <div style={{
