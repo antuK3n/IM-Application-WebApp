@@ -9,14 +9,12 @@ export async function POST(request: Request) {
     try {
       await connection.beginTransaction();
 
-      // Get the latest applicant ID and increment it
       const [latestIdResult] = await connection.execute(
         "SELECT MAX(CAST(Applicant_ID AS UNSIGNED)) as maxId FROM applicant_info"
       );
       const latestId = (latestIdResult as any)[0]?.maxId || 0;
       const newApplicantId = (latestId + 1).toString().padStart(3, "0");
 
-      // Insert applicant information
       await connection.execute(
         `INSERT INTO applicant_info (
           Applicant_ID, Applicant_Name, Applicant_Address, 
@@ -32,10 +30,8 @@ export async function POST(request: Request) {
         ]
       );
 
-      // Generate control number (6 characters max)
       const controlNumber = `${newApplicantId}${Date.now().toString().slice(-3)}`;
 
-      // Insert application information
       await connection.execute(
         `INSERT INTO application_info (
           ApplicantForm_ID, Applicant_ID, Control_Number, Position_Applied, Salary_Desired
@@ -49,7 +45,6 @@ export async function POST(request: Request) {
         ]
       );
 
-      // Insert education information
       await connection.execute(
         `INSERT INTO education_info (
           Student_ID, Applicant_ID, Educational_Attainment, Institution_Name, 
@@ -65,7 +60,6 @@ export async function POST(request: Request) {
         ]
       );
 
-      // Insert job information
       await connection.execute(
         `INSERT INTO job_info (
           Employment_ID, Applicant_ID, Company_Name, Company_Location, 
