@@ -71,40 +71,45 @@ CREATE DATABASE jobapplication;
 USE jobapplication;
 
 CREATE TABLE applicant_info (
-  Applicant_ID VARCHAR(3) PRIMARY KEY,
-  Applicant_Name VARCHAR(100) NOT NULL,
-  Applicant_Address TEXT NOT NULL,
-  Contact_Number VARCHAR(20) NOT NULL,
-  Age INT NOT NULL,
-  Sex CHAR(1) NOT NULL
+  Applicant_ID CHAR(3) NOT NULL,
+  Applicant_Name VARCHAR(30) DEFAULT NULL,
+  Applicant_Address VARCHAR(100) DEFAULT NULL,
+  Contact_Number VARCHAR(13) DEFAULT NULL,
+  Age INT DEFAULT NULL,
+  Sex CHAR(1) DEFAULT NULL,
+  PRIMARY KEY (Applicant_ID),
+  CONSTRAINT chk_sex CHECK (Sex IN ('M','F'))
 );
 
 CREATE TABLE application_info (
-  ApplicantForm_ID VARCHAR(3) PRIMARY KEY,
-  Applicant_ID VARCHAR(3) NOT NULL,
-  Control_Number VARCHAR(6) NOT NULL,
-  Position_Applied VARCHAR(100) NOT NULL,
-  Salary_Desired DECIMAL(10,2) NOT NULL,
+  ApplicantForm_ID CHAR(3) NOT NULL,
+  Applicant_ID CHAR(3) NOT NULL,
+  Control_Number CHAR(6) NOT NULL,
+  Position_Applied VARCHAR(100) DEFAULT NULL,
+  Salary_Desired DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (ApplicantForm_ID),
   FOREIGN KEY (Applicant_ID) REFERENCES applicant_info(Applicant_ID)
 );
 
 CREATE TABLE education_info (
-  Student_ID VARCHAR(3) PRIMARY KEY,
-  Applicant_ID VARCHAR(3) NOT NULL,
-  Educational_Attainment VARCHAR(100) NOT NULL,
-  Institution_Name VARCHAR(100) NOT NULL,
-  Year_Graduated INT NOT NULL,
-  Honors VARCHAR(100),
+  Student_ID VARCHAR(25) NOT NULL,
+  Applicant_ID CHAR(3) NOT NULL,
+  Educational_Attainment VARCHAR(15) DEFAULT NULL,
+  Institution_Name VARCHAR(50) DEFAULT NULL,
+  Year_Graduated INT DEFAULT NULL,
+  Honors VARCHAR(30) DEFAULT NULL,
+  PRIMARY KEY (Student_ID),
   FOREIGN KEY (Applicant_ID) REFERENCES applicant_info(Applicant_ID)
 );
 
 CREATE TABLE job_info (
-  Employment_ID VARCHAR(3) PRIMARY KEY,
-  Applicant_ID VARCHAR(3) NOT NULL,
-  Company_Name VARCHAR(100) NOT NULL,
-  Company_Location VARCHAR(100) NOT NULL,
-  Position VARCHAR(100) NOT NULL,
-  Salary DECIMAL(10,2) NOT NULL,
+  Employment_ID VARCHAR(12) NOT NULL,
+  Applicant_ID CHAR(3) NOT NULL,
+  Company_Name VARCHAR(50) DEFAULT NULL,
+  Company_Location VARCHAR(25) DEFAULT NULL,
+  Position VARCHAR(50) DEFAULT NULL,
+  Salary DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (Employment_ID),
   FOREIGN KEY (Applicant_ID) REFERENCES applicant_info(Applicant_ID)
 );
 ```
