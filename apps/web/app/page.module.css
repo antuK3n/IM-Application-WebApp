@@ -561,7 +561,8 @@ button.secondary {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin-top: 0.5rem;
+  margin: 0;
+  padding: 0;
 }
 
 .error {
@@ -602,5 +603,103 @@ button.secondary {
 .loginForm input[type="password"]:focus {
   background: #ffd43b;
   color: #1b4d7e;
+}
+
+.visible {
+  opacity: 1;
+  max-height: 400px;
+  transform: scaleY(1);
+  pointer-events: auto;
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), max-height 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.hidden {
+  opacity: 0;
+  max-height: 0;
+  transform: scaleY(0.95);
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), max-height 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.animatedFormSection {
+  width: 100%;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.animatedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.applicantActive .animatedContent {
+  opacity: 1;
+  transform: scaleY(1);
+  height: 64px;
+}
+
+.adminActive .animatedContent {
+  opacity: 1;
+  transform: scaleY(1);
+  height: 220px;
+}
+
+.animating .animatedContent {
+  opacity: 0.5;
+  transform: scaleY(0.95);
+}
+
+.loginForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+.applicantActive .loginForm {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
+              opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.adminActive .loginForm {
+  max-height: 400px;
+  opacity: 1;
+  pointer-events: auto;
+  margin-top: 0 rem;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
+              opacity 0.35s cubic-bezier(0.4,0,0.2,1),
+              margin-top 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.applicantActive .submitBtn {
+  max-height: 100px;
+  opacity: 1;
+  pointer-events: auto;
+  margin: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
+              opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.adminActive .submitBtn {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
+              opacity 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 
