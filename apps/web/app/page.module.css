@@ -267,17 +267,11 @@ button.secondary {
 }
 
 .formSection {
-  display: grid;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background-color: var(--background);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
   width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: background-color var(--transition-duration) ease,
-              border-color var(--transition-duration) ease,
-              box-shadow var(--transition-duration) ease;
+  margin-bottom: 24px;
+  background: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
 .sectionTitle {
@@ -365,5 +359,248 @@ button.secondary {
   opacity: 0.7;
   cursor: not-allowed;
   background: var(--text-secondary);
+}
+
+.bgWrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.bgImage {
+  object-fit: cover;
+  z-index: 1;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(90deg, rgba(27,77,126,0.95) 0%, rgba(27,77,126,0.7) 40%, rgba(6,44,65,0.2) 100%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.centerCard {
+  margin-left: 7vw;
+  max-width: 480px;
+  background: transparent;
+  padding: 48px 32px 32px 32px;
+  border-radius: 16px;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 3;
+}
+
+.logo {
+  margin-bottom: 16px;
+  width: 90px;
+  height: 90px;
+}
+
+.headerText {
+  margin-bottom: 24px;
+}
+
+.location {
+  color: #e0e6ed;
+  font-size: 1rem;
+  text-align: left;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.title {
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  text-align: left;
+  letter-spacing: 0.01em;
+}
+
+.tabRow {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: #e5eaf1;
+  color: #1b4d7e;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab.active {
+  background: #ffd43b;
+  color: #222;
+  font-weight: 700;
+}
+
+.submitBtn {
+  display: block;
+  width: 100%;
+  padding: 18px 0;
+  background: #e5eaf1;
+  color: #222;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: none !important;
+}
+
+.submitBtn:hover {
+  background: #ffd43b;
+  color: #1b4d7e;
+}
+
+.footerText {
+  color: #e0e6ed;
+  font-size: 0.95rem;
+  margin-top: 24px;
+  text-align: left;
+  opacity: 0.95;
+}
+
+@media (max-width: 900px) {
+  .centerCard {
+    margin-left: 0;
+    max-width: 95vw;
+    padding: 32px 8vw 24px 8vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .centerCard {
+    padding: 18px 2vw 12px 2vw;
+  }
+  .title {
+    font-size: 1.3rem;
+  }
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+.tabToggle {
+  position: relative;
+  display: flex;
+  width: 100%;
+  background: #e5eaf1;
+  border-radius: 8px;
+  margin-bottom: 32px;
+  overflow: hidden;
+  height: 48px;
+}
+
+.tab {
+  flex: 1;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: #1b4d7e;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+  outline: none;
+  height: 100%;
+}
+
+.tabActive {
+  flex: 1;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: #222;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s;
+  outline: none;
+  height: 100%;
+}
+
+.tabIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: #ffd43b;
+  border-radius: 8px;
+  z-index: 1;
+  transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.loginForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.error {
+  background: #dc2626;
+  color: #fff;
+  padding: 0.875rem;
+  border-radius: 4px;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.loginForm input[type="text"],
+.loginForm input[type="password"] {
+  width: 100%;
+  padding: 18px 18px;
+  background: #e5eaf1;
+  color: #222;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  text-align: left;
+  margin-bottom: 12px;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: none;
+  outline: none;
+}
+
+.loginForm input[type="text"]::placeholder,
+.loginForm input[type="password"]::placeholder {
+  color: #555;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.loginForm input[type="text"]:focus,
+.loginForm input[type="password"]:focus {
+  background: #ffd43b;
+  color: #1b4d7e;
 }
 
