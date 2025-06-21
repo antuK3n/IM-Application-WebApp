@@ -27,12 +27,12 @@ export async function GET() {
       const applications = await Promise.all((applicants as any[]).map(async (applicant) => {
         // Fetch education
         const [education] = await connection.execute(
-          `SELECT Educational_Attainment, Institution_Name, Year_Graduated, Honors FROM education_info WHERE Applicant_ID = ?`,
+          `SELECT Student_ID, Educational_Attainment, Institution_Name, Year_Graduated, Honors FROM education_info WHERE Applicant_ID = ?`,
           [applicant.Applicant_ID]
         );
         // Fetch jobs
         const [jobs] = await connection.execute(
-          `SELECT Company_Name, Company_Location, Position, Salary FROM job_info WHERE Applicant_ID = ?`,
+          `SELECT Employment_ID, Company_Name, Company_Location, Position, Salary FROM job_info WHERE Applicant_ID = ?`,
           [applicant.Applicant_ID]
         );
         return {

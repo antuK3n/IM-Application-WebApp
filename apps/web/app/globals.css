@@ -101,3 +101,7 @@ html.darkMode .formSection {
   border-color: #2d2d2d;
   color: #ffffff;
 }
+
+[data-next-debug-tool] {
+  display: none !important;
+}

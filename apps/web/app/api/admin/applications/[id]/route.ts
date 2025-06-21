@@ -56,109 +56,109 @@ export async function PUT(
 ) {
   const { id } = await context.params;
   const data = await request.json();
+  const { education = [], jobs = [], ...applicantData } = data;
 
+  const connection = await pool.getConnection();
   try {
-    const connection = await pool.getConnection();
+    await connection.beginTransaction();
 
-    try {
-      await connection.beginTransaction();
+    // 1. Update applicant_info table
+    await connection.execute(
+      `UPDATE applicant_info SET 
+        Applicant_Name = ?, Applicant_Address = ?, Contact_Number = ?,
+        Age = ?, Sex = ?
+      WHERE Applicant_ID = ?`,
+      [
+        applicantData.Applicant_Name,
+        applicantData.Applicant_Address,
+        applicantData.Contact_Number,
+        applicantData.Age,
+        applicantData.Sex,
+        id,
+      ]
+    );
 
-      // Update applicant information
-      await connection.execute(
-        `UPDATE applicant_info SET 
-          Applicant_Name = ?,
-          Applicant_Address = ?,
-          Contact_Number = ?,
-          Age = ?,
-          Sex = ?
-        WHERE Applicant_ID = ?`,
-        [
-          data.Applicant_Name,
-          data.Applicant_Address,
-          data.Contact_Number,
-          data.Age,
-          data.Sex,
-          id,
-        ]
-      );
+    // 2. Update application_info table
+    await connection.execute(
+      `UPDATE application_info SET 
+        Position_Applied = ?, Salary_Desired = ?
+      WHERE Applicant_ID = ?`,
+      [applicantData.Position_Applied, applicantData.Salary_Desired, id]
+    );
 
-      // Update application information
-      await connection.execute(
-        `UPDATE application_info SET 
-          Position_Applied = ?,
-          Salary_Desired = ?
-        WHERE Applicant_ID = ?`,
-        [data.Position_Applied, data.Salary_Desired, id]
-      );
+    // 3. Delete existing education and job info
+    await connection.execute(
+      "DELETE FROM education_info WHERE Applicant_ID = ?",
+      [id]
+    );
+    await connection.execute("DELETE FROM job_info WHERE Applicant_ID = ?", [
+      id,
+    ]);
 
-      // Handle education information - insert if doesn't exist, update if it does
-      if (
-        data.Educational_Attainment ||
-        data.Institution_Name ||
-        data.Year_Graduated
-      ) {
-        await connection.execute(
+    // 4. Insert new education info
+    if (education.length > 0) {
+      const educationValues = education
+        .filter(
+          (edu: any) => edu.Educational_Attainment && edu.Institution_Name
+        )
+        .map((edu: any, index: number) => [
+          id, // Applicant_ID
+          edu.Student_ID && !edu.Student_ID.startsWith("new-")
+            ? edu.Student_ID
+            : `${id}-${Date.now()}-${index}`,
+          edu.Educational_Attainment,
+          edu.Institution_Name,
+          edu.Year_Graduated,
+          edu.Honors,
+        ]);
+
+      if (educationValues.length > 0) {
+        await connection.query(
           `INSERT INTO education_info (
-            Student_ID, Applicant_ID, Educational_Attainment, Institution_Name, 
+            Applicant_ID, Student_ID, Educational_Attainment, Institution_Name, 
             Year_Graduated, Honors
-          ) VALUES (?, ?, ?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE
-            Educational_Attainment = VALUES(Educational_Attainment),
-            Institution_Name = VALUES(Institution_Name),
-            Year_Graduated = VALUES(Year_Graduated),
-            Honors = VALUES(Honors)`,
-          [
-            id, // Use Applicant_ID as Student_ID for simplicity
-            id,
-            data.Educational_Attainment || null,
-            data.Institution_Name || null,
-            data.Year_Graduated || null,
-            data.Honors || null,
-          ]
+          ) VALUES ?`,
+          [educationValues]
         );
       }
-
-      // Handle job information - insert if doesn't exist, update if it does
-      if (
-        data.Company_Name ||
-        data.Position ||
-        data.Company_Location ||
-        data.Salary
-      ) {
-        await connection.execute(
-          `INSERT INTO job_info (
-            Employment_ID, Applicant_ID, Company_Name, Company_Location, 
-            Position, Salary
-          ) VALUES (?, ?, ?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE
-            Company_Name = VALUES(Company_Name),
-            Company_Location = VALUES(Company_Location),
-            Position = VALUES(Position),
-            Salary = VALUES(Salary)`,
-          [
-            id, // Use Applicant_ID as Employment_ID for simplicity
-            id,
-            data.Company_Name || null,
-            data.Company_Location || null,
-            data.Position || null,
-            data.Salary || null,
-          ]
-        );
-      }
-
-      await connection.commit();
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
     }
+
+    // 5. Insert new job info
+    if (jobs.length > 0) {
+      const jobValues = jobs
+        .filter((job: any) => job.Company_Name && job.Position)
+        .map((job: any, index: number) => [
+          id, // Applicant_ID
+          job.Employment_ID && !job.Employment_ID.startsWith("new-")
+            ? job.Employment_ID
+            : `${id}-${Date.now()}-${index}`,
+          job.Company_Name,
+          job.Company_Location,
+          job.Position,
+          job.Salary,
+        ]);
+
+      if (jobValues.length > 0) {
+        await connection.query(
+          `INSERT INTO job_info (
+            Applicant_ID, Employment_ID, Company_Name, Company_Location, 
+            Position, Salary
+          ) VALUES ?`,
+          [jobValues]
+        );
+      }
+    }
+
+    await connection.commit();
+    return NextResponse.json({ success: true });
   } catch (error) {
+    await connection.rollback();
     console.error("Error updating application:", error);
     return NextResponse.json(
       { error: "Failed to update application" },
       { status: 500 }
     );
+  } finally {
+    connection.release();
   }
 }

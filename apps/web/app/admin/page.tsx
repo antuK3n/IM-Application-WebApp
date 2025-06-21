@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 interface Education {
+  Student_ID: string;
   Educational_Attainment: string;
   Institution_Name: string;
   Year_Graduated: number;
@@ -13,6 +14,7 @@ interface Education {
 }
 
 interface Job {
+  Employment_ID: string;
   Company_Name: string;
   Company_Location: string;
   Position: string;
@@ -33,22 +35,11 @@ interface Application {
   jobs: Job[];
 }
 
-interface EditingApplication extends Omit<Application, 'education' | 'jobs'> {
-  Educational_Attainment: string;
-  Institution_Name: string;
-  Year_Graduated: number;
-  Honors: string | null;
-  Company_Name: string;
-  Company_Location: string;
-  Position: string;
-  Salary: number;
-}
-
 export default function AdminPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingApplication, setEditingApplication] = useState<EditingApplication | null>(null);
+  const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const [sortField, setSortField] = useState<'Applicant_ID' | 'Applicant_Name'>('Applicant_ID');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -87,51 +78,91 @@ export default function AdminPage() {
   };
 
   const handleEdit = (application: Application) => {
-    console.log('Original application data:', application);
-    
-    // Get the first education and job records (if they exist)
-    const firstEducation = application.education && application.education.length > 0 ? application.education[0] : null;
-    const firstJob = application.jobs && application.jobs.length > 0 ? application.jobs[0] : null;
-    
-    console.log('First education record:', firstEducation);
-    console.log('First job record:', firstJob);
-    console.log('Honors value:', firstEducation?.Honors);
-    
-    // Initialize all fields with default values if they're undefined
-    const initializedApplication: EditingApplication = {
-      ...application,
-      Applicant_Name: application.Applicant_Name || '',
-      Applicant_Address: application.Applicant_Address || '',
-      Contact_Number: application.Contact_Number || '',
-      Age: application.Age || 0,
-      Sex: application.Sex || '',
-      Position_Applied: application.Position_Applied || '',
-      Salary_Desired: application.Salary_Desired || 0,
-      Educational_Attainment: firstEducation?.Educational_Attainment || '',
-      Institution_Name: firstEducation?.Institution_Name || '',
-      Year_Graduated: firstEducation?.Year_Graduated || 0,
-      Honors: firstEducation?.Honors !== null && firstEducation?.Honors !== undefined ? firstEducation.Honors : null,
-      Company_Name: firstJob?.Company_Name || '',
-      Company_Location: firstJob?.Company_Location || '',
-      Position: firstJob?.Position || '',
-      Salary: firstJob?.Salary || 0
-    };
-    console.log('Initialized application data:', initializedApplication);
-    console.log('Honors in initialized data:', initializedApplication.Honors);
-    setEditingApplication(initializedApplication);
+    // Use a deep copy to prevent modifying the original state directly
+    const applicationCopy = JSON.parse(JSON.stringify(application));
+    setEditingApplication(applicationCopy);
   };
 
-  const handleSave = async (updatedData: EditingApplication) => {
+  const handleFieldChange = (field: keyof Application, value: any) => {
+    if (!editingApplication) return;
+    setEditingApplication({
+      ...editingApplication,
+      [field]: value,
+    });
+  };
+
+  const handleNestedChange = (
+    listName: 'education' | 'jobs',
+    index: number,
+    field: keyof Education | keyof Job,
+    value: any
+  ) => {
+    if (!editingApplication) return;
+
+    const updatedList = [...(editingApplication[listName] as any[])];
+    updatedList[index] = {
+      ...updatedList[index],
+      [field]: value,
+    };
+
+    setEditingApplication({
+      ...editingApplication,
+      [listName]: updatedList,
+    });
+  };
+
+  const addListItem = (listName: 'education' | 'jobs') => {
+    if (!editingApplication) return;
+
+    const newItem =
+      listName === 'education'
+        ? {
+            Student_ID: `new-${Date.now()}`,
+            Educational_Attainment: '',
+            Institution_Name: '',
+            Year_Graduated: 0,
+            Honors: '',
+          }
+        : {
+            Employment_ID: `new-${Date.now()}`,
+            Company_Name: '',
+            Company_Location: '',
+            Position: '',
+            Salary: 0,
+          };
+
+    setEditingApplication({
+      ...editingApplication,
+      [listName]: [...(editingApplication[listName] as any[]), newItem],
+    });
+  };
+
+  const removeListItem = (listName: 'education' | 'jobs', index: number) => {
+    if (!editingApplication) return;
+
+    const updatedList = (editingApplication[listName] as any[]).filter(
+      (_, i) => i !== index
+    );
+
+    setEditingApplication({
+      ...editingApplication,
+      [listName]: updatedList,
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editingApplication) return;
+
     setSaving(true);
     setError(null);
     
     try {
-      const response = await fetch(`/api/admin/applications/${updatedData.Applicant_ID}`, {
+      const response = await fetch(`/api/admin/applications/${editingApplication.Applicant_ID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(editingApplication),
       });
 
       const result = await response.json();
@@ -355,32 +386,22 @@ export default function AdminPage() {
           <div className={styles.modalContent}>
             <h2>Edit Application</h2>
             {error && (
-              <div style={{
-                background: 'rgba(220, 53, 69, 0.1)',
-                border: '1px solid rgba(220, 53, 69, 0.3)',
-                borderRadius: '4px',
-                padding: '8px 12px',
-                marginBottom: '16px',
-                color: '#dc3545',
-                fontSize: '14px'
-              }}>
+              <div className={styles.errorBanner}>
                 {error}
               </div>
             )}
             <form onSubmit={(e) => {
               e.preventDefault();
-              handleSave(editingApplication);
+              handleSave();
             }}>
+              {/* Personal Info */}
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>Name *</label>
                   <input
                     type="text"
                     value={editingApplication.Applicant_Name}
-                    onChange={(e) => setEditingApplication({
-                      ...editingApplication,
-                      Applicant_Name: e.target.value
-                    })}
+                    onChange={(e) => handleFieldChange('Applicant_Name', e.target.value)}
                     required
                   />
                 </div>
@@ -389,10 +410,7 @@ export default function AdminPage() {
                   <input
                     type="number"
                     value={editingApplication.Age}
-                    onChange={(e) => setEditingApplication({
-                      ...editingApplication,
-                      Age: Number(e.target.value) || 0
-                    })}
+                    onChange={(e) => handleFieldChange('Age', Number(e.target.value))}
                     required
                     min="18"
                   />
@@ -401,10 +419,7 @@ export default function AdminPage() {
                   <label>Sex *</label>
                   <select
                     value={editingApplication.Sex}
-                    onChange={(e) => setEditingApplication({
-                      ...editingApplication,
-                      Sex: e.target.value
-                    })}
+                    onChange={(e) => handleFieldChange('Sex', e.target.value)}
                     required
                   >
                     <option value="">Select</option>
@@ -413,43 +428,33 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
-
               <div className={styles.formGroup}>
                 <label>Address *</label>
                 <input
                   type="text"
                   value={editingApplication.Applicant_Address}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Applicant_Address: e.target.value
-                  })}
+                  onChange={(e) => handleFieldChange('Applicant_Address', e.target.value)}
                   required
                 />
               </div>
-
               <div className={styles.formGroup}>
                 <label>Contact Number *</label>
                 <input
                   type="text"
                   value={editingApplication.Contact_Number}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Contact_Number: e.target.value
-                  })}
+                  onChange={(e) => handleFieldChange('Contact_Number', e.target.value)}
                   required
                 />
               </div>
 
+              {/* Application Details */}
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>Position Applied *</label>
                   <input
                     type="text"
                     value={editingApplication.Position_Applied}
-                    onChange={(e) => setEditingApplication({
-                      ...editingApplication,
-                      Position_Applied: e.target.value
-                    })}
+                    onChange={(e) => handleFieldChange('Position_Applied', e.target.value)}
                     required
                   />
                 </div>
@@ -458,126 +463,131 @@ export default function AdminPage() {
                   <input
                     type="number"
                     value={editingApplication.Salary_Desired}
-                    onChange={(e) => setEditingApplication({
-                      ...editingApplication,
-                      Salary_Desired: Number(e.target.value) || 0
-                    })}
+                    onChange={(e) => handleFieldChange('Salary_Desired', Number(e.target.value))}
                     required
                     min="0"
                   />
                 </div>
               </div>
 
-              <div style={{ borderTop: '1px solid #e0e0e0', margin: '20px 0', paddingTop: '20px' }}>
-                <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Educational Background</h3>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Educational Attainment</label>
-                    <input
-                      type="text"
-                      value={editingApplication.Educational_Attainment}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Educational_Attainment: e.target.value
-                      })}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Institution</label>
-                    <input
-                      type="text"
-                      value={editingApplication.Institution_Name}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Institution_Name: e.target.value
-                      })}
-                    />
-                  </div>
+              {/* Educational Background */}
+              <div className={styles.formSection}>
+                <div className={styles.formSectionHeader}>
+                  <h3>Educational Background</h3>
+                  <button type="button" onClick={() => addListItem('education')} className={styles.addButton}>
+                    + Add Education
+                  </button>
                 </div>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Year Graduated</label>
-                    <input
-                      type="number"
-                      value={editingApplication.Year_Graduated || ''}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Year_Graduated: Number(e.target.value) || 0
-                      })}
-                      min="1900"
-                      max="2030"
-                    />
+                {editingApplication.education.map((edu, index) => (
+                  <div key={index} className={styles.formSubSection}>
+                    <div className={styles.formSubSectionHeader}>
+                      <h4>Education #{index + 1}</h4>
+                      <button type="button" onClick={() => removeListItem('education', index)} className={styles.removeButton}>
+                        Remove
+                      </button>
+                    </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Educational Attainment</label>
+                        <input
+                          type="text"
+                          value={edu.Educational_Attainment || ''}
+                          onChange={(e) => handleNestedChange('education', index, 'Educational_Attainment', e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Institution</label>
+                        <input
+                          type="text"
+                          value={edu.Institution_Name || ''}
+                          onChange={(e) => handleNestedChange('education', index, 'Institution_Name', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Year Graduated</label>
+                        <input
+                          type="number"
+                          value={edu.Year_Graduated || ''}
+                          onChange={(e) => handleNestedChange('education', index, 'Year_Graduated', Number(e.target.value))}
+                          min="1900"
+                          max={new Date().getFullYear() + 10}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Honors</label>
+                        <input
+                          type="text"
+                          value={edu.Honors || ''}
+                          onChange={(e) => handleNestedChange('education', index, 'Honors', e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>Honors (Optional)</label>
-                    <input
-                      type="text"
-                      value={editingApplication.Honors || ''}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Honors: e.target.value || null
-                      })}
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
 
-              <div style={{ borderTop: '1px solid #e0e0e0', margin: '20px 0', paddingTop: '20px' }}>
-                <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Previous Employment</h3>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Company Name</label>
-                    <input
-                      type="text"
-                      value={editingApplication.Company_Name}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Company_Name: e.target.value
-                      })}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Company Location</label>
-                    <input
-                      type="text"
-                      value={editingApplication.Company_Location}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Company_Location: e.target.value
-                      })}
-                    />
-                  </div>
+              {/* Previous Employment */}
+              <div className={styles.formSection}>
+                <div className={styles.formSectionHeader}>
+                  <h3>Previous Employment</h3>
+                  <button type="button" onClick={() => addListItem('jobs')} className={styles.addButton}>
+                    + Add Employment
+                  </button>
                 </div>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Position</label>
-                    <input
-                      type="text"
-                      value={editingApplication.Position}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Position: e.target.value
-                      })}
-                    />
+                {editingApplication.jobs.map((job, index) => (
+                  <div key={index} className={styles.formSubSection}>
+                    <div className={styles.formSubSectionHeader}>
+                      <h4>Employment #{index + 1}</h4>
+                      <button type="button" onClick={() => removeListItem('jobs', index)} className={styles.removeButton}>
+                        Remove
+                      </button>
+                    </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Company Name</label>
+                        <input
+                          type="text"
+                          value={job.Company_Name || ''}
+                          onChange={(e) => handleNestedChange('jobs', index, 'Company_Name', e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Company Location</label>
+                        <input
+                          type="text"
+                          value={job.Company_Location || ''}
+                          onChange={(e) => handleNestedChange('jobs', index, 'Company_Location', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Position</label>
+                        <input
+                          type="text"
+                          value={job.Position || ''}
+                          onChange={(e) => handleNestedChange('jobs', index, 'Position', e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Salary</label>
+                        <input
+                          type="number"
+                          value={job.Salary || ''}
+                          onChange={(e) => handleNestedChange('jobs', index, 'Salary', Number(e.target.value))}
+                          min="0"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>Salary</label>
-                    <input
-                      type="number"
-                      value={editingApplication.Salary}
-                      onChange={(e) => setEditingApplication({
-                        ...editingApplication,
-                        Salary: Number(e.target.value) || 0
-                      })}
-                      min="0"
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className={styles.modalActions}>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className={styles.saveButton}
                   disabled={saving}
                 >
