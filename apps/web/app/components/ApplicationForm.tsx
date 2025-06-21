@@ -120,7 +120,7 @@ export default function ApplicationForm() {
     return () => {
       if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
     };
-  }, [isSubmitting]);
+  }, [isSubmitting, showLoading]);
 
   return (
     <div className={styles.formContainer}>
@@ -234,7 +234,7 @@ export default function ApplicationForm() {
           }
         }}
       >
-        {({ values, errors, isSubmitting, isValid, dirty }) => {
+        {({ values, errors, isValid, dirty }) => {
           console.log('DEBUG: values', values);
           console.log('DEBUG: errors', errors);
           console.log('DEBUG: isSubmitting', isSubmitting, 'isValid', isValid, 'dirty', dirty);

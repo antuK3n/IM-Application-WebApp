@@ -91,39 +91,60 @@ export async function PUT(
         [data.Position_Applied, data.Salary_Desired, id]
       );
 
-      // Update education information
-      await connection.execute(
-        `UPDATE education_info SET 
-          Educational_Attainment = ?,
-          Institution_Name = ?,
-          Year_Graduated = ?,
-          Honors = ?
-        WHERE Applicant_ID = ?`,
-        [
-          data.Educational_Attainment,
-          data.Institution_Name,
-          data.Year_Graduated,
-          data.Honors,
-          id,
-        ]
-      );
+      // Handle education information - insert if doesn't exist, update if it does
+      if (
+        data.Educational_Attainment ||
+        data.Institution_Name ||
+        data.Year_Graduated
+      ) {
+        await connection.execute(
+          `INSERT INTO education_info (
+            Student_ID, Applicant_ID, Educational_Attainment, Institution_Name, 
+            Year_Graduated, Honors
+          ) VALUES (?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            Educational_Attainment = VALUES(Educational_Attainment),
+            Institution_Name = VALUES(Institution_Name),
+            Year_Graduated = VALUES(Year_Graduated),
+            Honors = VALUES(Honors)`,
+          [
+            id, // Use Applicant_ID as Student_ID for simplicity
+            id,
+            data.Educational_Attainment || null,
+            data.Institution_Name || null,
+            data.Year_Graduated || null,
+            data.Honors || null,
+          ]
+        );
+      }
 
-      // Update job information
-      await connection.execute(
-        `UPDATE job_info SET 
-          Company_Name = ?,
-          Company_Location = ?,
-          Position = ?,
-          Salary = ?
-        WHERE Applicant_ID = ?`,
-        [
-          data.Company_Name,
-          data.Company_Location,
-          data.Position,
-          data.Salary,
-          id,
-        ]
-      );
+      // Handle job information - insert if doesn't exist, update if it does
+      if (
+        data.Company_Name ||
+        data.Position ||
+        data.Company_Location ||
+        data.Salary
+      ) {
+        await connection.execute(
+          `INSERT INTO job_info (
+            Employment_ID, Applicant_ID, Company_Name, Company_Location, 
+            Position, Salary
+          ) VALUES (?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            Company_Name = VALUES(Company_Name),
+            Company_Location = VALUES(Company_Location),
+            Position = VALUES(Position),
+            Salary = VALUES(Salary)`,
+          [
+            id, // Use Applicant_ID as Employment_ID for simplicity
+            id,
+            data.Company_Name || null,
+            data.Company_Location || null,
+            data.Position || null,
+            data.Salary || null,
+          ]
+        );
+      }
 
       await connection.commit();
       return NextResponse.json({ success: true });

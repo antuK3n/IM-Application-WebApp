@@ -219,28 +219,44 @@
 .formGroup label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #fff;
+  font-weight: 500;
+  color: #333;
 }
 
-.formGroup input {
+.formGroup input,
+.formGroup select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #062C41;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  background-color: #062C41;
-  color: #fff;
+  font-size: 1rem;
 }
 
-.formGroup input:focus {
+.formGroup input:focus,
+.formGroup select:focus {
   outline: none;
   border-color: #1B4D7E;
+  box-shadow: 0 0 0 2px rgba(27, 77, 126, 0.2);
+}
+
+.formRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formRow .formGroup {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .modalActions {
   display: flex;
-  justify-content: flex-end;
   gap: 1rem;
-  margin-top: 1.5rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
 }
 
 .saveButton,

@@ -5,6 +5,20 @@ import styles from './admin.module.css';
 import Link from 'next/link';
 import Image from 'next/image';
 
+interface Education {
+  Educational_Attainment: string;
+  Institution_Name: string;
+  Year_Graduated: number;
+  Honors: string | null;
+}
+
+interface Job {
+  Company_Name: string;
+  Company_Location: string;
+  Position: string;
+  Salary: number;
+}
+
 interface Application {
   Applicant_ID: string;
   Applicant_Name: string;
@@ -15,6 +29,11 @@ interface Application {
   Control_Number: string;
   Position_Applied: string;
   Salary_Desired: number;
+  education: Education[];
+  jobs: Job[];
+}
+
+interface EditingApplication extends Omit<Application, 'education' | 'jobs'> {
   Educational_Attainment: string;
   Institution_Name: string;
   Year_Graduated: number;
@@ -29,11 +48,12 @@ export default function AdminPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingApplication, setEditingApplication] = useState<Application | null>(null);
+  const [editingApplication, setEditingApplication] = useState<EditingApplication | null>(null);
   const [sortField, setSortField] = useState<'Applicant_ID' | 'Applicant_Name'>('Applicant_ID');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const [saving, setSaving] = useState(false);
   const loadingTexts = ['Loading.', 'Loading..', 'Loading...'];
 
   useEffect(() => {
@@ -68,28 +88,43 @@ export default function AdminPage() {
 
   const handleEdit = (application: Application) => {
     console.log('Original application data:', application);
+    
+    // Get the first education and job records (if they exist)
+    const firstEducation = application.education && application.education.length > 0 ? application.education[0] : null;
+    const firstJob = application.jobs && application.jobs.length > 0 ? application.jobs[0] : null;
+    
+    console.log('First education record:', firstEducation);
+    console.log('First job record:', firstJob);
+    console.log('Honors value:', firstEducation?.Honors);
+    
     // Initialize all fields with default values if they're undefined
-    const initializedApplication = {
+    const initializedApplication: EditingApplication = {
       ...application,
       Applicant_Name: application.Applicant_Name || '',
       Applicant_Address: application.Applicant_Address || '',
       Contact_Number: application.Contact_Number || '',
+      Age: application.Age || 0,
+      Sex: application.Sex || '',
       Position_Applied: application.Position_Applied || '',
       Salary_Desired: application.Salary_Desired || 0,
-      Educational_Attainment: application.Educational_Attainment || '',
-      Institution_Name: application.Institution_Name || '',
-      Year_Graduated: application.Year_Graduated || 0,
-      Honors: application.Honors || null,
-      Company_Name: application.Company_Name || '',
-      Company_Location: application.Company_Location || '',
-      Position: application.Position || '',
-      Salary: application.Salary || 0
+      Educational_Attainment: firstEducation?.Educational_Attainment || '',
+      Institution_Name: firstEducation?.Institution_Name || '',
+      Year_Graduated: firstEducation?.Year_Graduated || 0,
+      Honors: firstEducation?.Honors !== null && firstEducation?.Honors !== undefined ? firstEducation.Honors : null,
+      Company_Name: firstJob?.Company_Name || '',
+      Company_Location: firstJob?.Company_Location || '',
+      Position: firstJob?.Position || '',
+      Salary: firstJob?.Salary || 0
     };
     console.log('Initialized application data:', initializedApplication);
+    console.log('Honors in initialized data:', initializedApplication.Honors);
     setEditingApplication(initializedApplication);
   };
 
-  const handleSave = async (updatedData: Application) => {
+  const handleSave = async (updatedData: EditingApplication) => {
+    setSaving(true);
+    setError(null);
+    
     try {
       const response = await fetch(`/api/admin/applications/${updatedData.Applicant_ID}`, {
         method: 'PUT',
@@ -99,8 +134,10 @@ export default function AdminPage() {
         body: JSON.stringify(updatedData),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to update application');
+        throw new Error(result.error || 'Failed to update application');
       }
 
       // Refresh the applications list
@@ -108,6 +145,8 @@ export default function AdminPage() {
       setEditingApplication(null);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to update application');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -235,7 +274,7 @@ export default function AdminPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedApplications.map((app: any) => (
+            {filteredAndSortedApplications.map((app: Application) => (
               <tr key={app.Applicant_ID}>
                 <td>{app.Applicant_ID}</td>
                 <td>{app.Applicant_Name}</td>
@@ -248,7 +287,7 @@ export default function AdminPage() {
                 <td>
                   {app.education && app.education.length > 0 ? (
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                      {app.education.map((edu: any, idx: number) => (
+                      {app.education.map((edu: Education, idx: number) => (
                         <li key={idx}>
                           <strong>{edu.Educational_Attainment}</strong>
                           {edu.Institution_Name && (
@@ -257,7 +296,7 @@ export default function AdminPage() {
                           {edu.Year_Graduated && (
                             <> ({edu.Year_Graduated})</>
                           )}
-                          {edu.Honors && (
+                          {edu.Honors && edu.Honors.trim() !== '' && (
                             <><br /><small>Honors: {edu.Honors}</small></>
                           )}
                         </li>
@@ -270,7 +309,7 @@ export default function AdminPage() {
                 <td>
                   {app.jobs && app.jobs.length > 0 ? (
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                      {app.jobs.map((job: any, idx: number) => (
+                      {app.jobs.map((job: Job, idx: number) => (
                         <li key={idx}>
                           <strong>{job.Position}</strong>
                           {job.Company_Name && (
@@ -315,45 +354,71 @@ export default function AdminPage() {
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>Edit Application</h2>
+            {error && (
+              <div style={{
+                background: 'rgba(220, 53, 69, 0.1)',
+                border: '1px solid rgba(220, 53, 69, 0.3)',
+                borderRadius: '4px',
+                padding: '8px 12px',
+                marginBottom: '16px',
+                color: '#dc3545',
+                fontSize: '14px'
+              }}>
+                {error}
+              </div>
+            )}
             <form onSubmit={(e) => {
               e.preventDefault();
-              // Ensure all required fields have values
-              const updatedData = {
-                ...editingApplication,
-                Applicant_Name: editingApplication.Applicant_Name || '',
-                Applicant_Address: editingApplication.Applicant_Address || '',
-                Contact_Number: editingApplication.Contact_Number || '',
-                Position_Applied: editingApplication.Position_Applied || '',
-                Salary_Desired: editingApplication.Salary_Desired || 0,
-                Educational_Attainment: editingApplication.Educational_Attainment || '',
-                Institution_Name: editingApplication.Institution_Name || '',
-                Year_Graduated: editingApplication.Year_Graduated || 0,
-                Honors: editingApplication.Honors || null,
-                Company_Name: editingApplication.Company_Name || '',
-                Company_Location: editingApplication.Company_Location || '',
-                Position: editingApplication.Position || '',
-                Salary: editingApplication.Salary || 0
-              };
-              handleSave(updatedData);
+              handleSave(editingApplication);
             }}>
-              <div className={styles.formGroup}>
-                <label>Name</label>
-                <input
-                  type="text"
-                  value={editingApplication.Applicant_Name || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Applicant_Name: e.target.value
-                  })}
-                  required
-                />
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Name *</label>
+                  <input
+                    type="text"
+                    value={editingApplication.Applicant_Name}
+                    onChange={(e) => setEditingApplication({
+                      ...editingApplication,
+                      Applicant_Name: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Age *</label>
+                  <input
+                    type="number"
+                    value={editingApplication.Age}
+                    onChange={(e) => setEditingApplication({
+                      ...editingApplication,
+                      Age: Number(e.target.value) || 0
+                    })}
+                    required
+                    min="18"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Sex *</label>
+                  <select
+                    value={editingApplication.Sex}
+                    onChange={(e) => setEditingApplication({
+                      ...editingApplication,
+                      Sex: e.target.value
+                    })}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                  </select>
+                </div>
               </div>
 
               <div className={styles.formGroup}>
-                <label>Address</label>
+                <label>Address *</label>
                 <input
                   type="text"
-                  value={editingApplication.Applicant_Address || ''}
+                  value={editingApplication.Applicant_Address}
                   onChange={(e) => setEditingApplication({
                     ...editingApplication,
                     Applicant_Address: e.target.value
@@ -363,10 +428,10 @@ export default function AdminPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Contact Number</label>
+                <label>Contact Number *</label>
                 <input
                   type="text"
-                  value={editingApplication.Contact_Number || ''}
+                  value={editingApplication.Contact_Number}
                   onChange={(e) => setEditingApplication({
                     ...editingApplication,
                     Contact_Number: e.target.value
@@ -375,143 +440,157 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Position Applied</label>
-                <input
-                  type="text"
-                  value={editingApplication.Position_Applied || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Position_Applied: e.target.value
-                  })}
-                  required
-                />
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Position Applied *</label>
+                  <input
+                    type="text"
+                    value={editingApplication.Position_Applied}
+                    onChange={(e) => setEditingApplication({
+                      ...editingApplication,
+                      Position_Applied: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Salary Desired *</label>
+                  <input
+                    type="number"
+                    value={editingApplication.Salary_Desired}
+                    onChange={(e) => setEditingApplication({
+                      ...editingApplication,
+                      Salary_Desired: Number(e.target.value) || 0
+                    })}
+                    required
+                    min="0"
+                  />
+                </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Salary Desired</label>
-                <input
-                  type="number"
-                  value={editingApplication.Salary_Desired || 0}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Salary_Desired: Number(e.target.value) || 0
-                  })}
-                  required
-                />
+              <div style={{ borderTop: '1px solid #e0e0e0', margin: '20px 0', paddingTop: '20px' }}>
+                <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Educational Background</h3>
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Educational Attainment</label>
+                    <input
+                      type="text"
+                      value={editingApplication.Educational_Attainment}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Educational_Attainment: e.target.value
+                      })}
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Institution</label>
+                    <input
+                      type="text"
+                      value={editingApplication.Institution_Name}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Institution_Name: e.target.value
+                      })}
+                    />
+                  </div>
+                </div>
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Year Graduated</label>
+                    <input
+                      type="number"
+                      value={editingApplication.Year_Graduated || ''}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Year_Graduated: Number(e.target.value) || 0
+                      })}
+                      min="1900"
+                      max="2030"
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Honors (Optional)</label>
+                    <input
+                      type="text"
+                      value={editingApplication.Honors || ''}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Honors: e.target.value || null
+                      })}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Education</label>
-                <input
-                  type="text"
-                  value={editingApplication.Educational_Attainment || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Educational_Attainment: e.target.value
-                  })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Institution</label>
-                <input
-                  type="text"
-                  value={editingApplication.Institution_Name || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Institution_Name: e.target.value
-                  })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Year Graduated</label>
-                <input
-                  type="number"
-                  value={editingApplication.Year_Graduated || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Year_Graduated: Number(e.target.value) || 0
-                  })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Honors (Optional)</label>
-                <input
-                  type="text"
-                  value={editingApplication.Honors || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Honors: e.target.value || null
-                  })}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Company Name</label>
-                <input
-                  type="text"
-                  value={editingApplication.Company_Name || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Company_Name: e.target.value
-                  })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Company Location</label>
-                <input
-                  type="text"
-                  value={editingApplication.Company_Location || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Company_Location: e.target.value
-                  })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Position</label>
-                <input
-                  type="text"
-                  value={editingApplication.Position || ''}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Position: e.target.value
-                  })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Salary</label>
-                <input
-                  type="number"
-                  value={editingApplication.Salary || 0}
-                  onChange={(e) => setEditingApplication({
-                    ...editingApplication,
-                    Salary: Number(e.target.value) || 0
-                  })}
-                  required
-                />
+              <div style={{ borderTop: '1px solid #e0e0e0', margin: '20px 0', paddingTop: '20px' }}>
+                <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Previous Employment</h3>
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Company Name</label>
+                    <input
+                      type="text"
+                      value={editingApplication.Company_Name}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Company_Name: e.target.value
+                      })}
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Company Location</label>
+                    <input
+                      type="text"
+                      value={editingApplication.Company_Location}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Company_Location: e.target.value
+                      })}
+                    />
+                  </div>
+                </div>
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Position</label>
+                    <input
+                      type="text"
+                      value={editingApplication.Position}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Position: e.target.value
+                      })}
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Salary</label>
+                    <input
+                      type="number"
+                      value={editingApplication.Salary}
+                      onChange={(e) => setEditingApplication({
+                        ...editingApplication,
+                        Salary: Number(e.target.value) || 0
+                      })}
+                      min="0"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className={styles.modalActions}>
-                <button type="submit" className={styles.saveButton}>
-                  Save Changes
+                <button 
+                  type="submit" 
+                  className={styles.saveButton}
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEditingApplication(null)}
+                  onClick={() => {
+                    setEditingApplication(null);
+                    setError(null);
+                  }}
                   className={styles.cancelButton}
+                  disabled={saving}
                 >
                   Cancel
                 </button>

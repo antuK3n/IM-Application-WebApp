@@ -19,7 +19,7 @@ async function executeWithRetry(query: string, params: any[]) {
     } catch (error) {
       lastError = error;
       if (i < MAX_RETRIES - 1) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       }
     }
   }
@@ -33,7 +33,8 @@ export async function GET(
   const { id } = await context.params;
 
   try {
-    const applications = await executeWithRetry(`
+    const applications = await executeWithRetry(
+      `
       SELECT 
         a.Applicant_ID,
         a.Applicant_Name,
@@ -54,10 +55,12 @@ export async function GET(
         j.Salary
       FROM applicant_info a
       JOIN application_info app ON a.Applicant_ID = app.Applicant_ID
-      JOIN education_info e ON a.Applicant_ID = e.Applicant_ID
-      JOIN job_info j ON a.Applicant_ID = j.Applicant_ID
+      LEFT JOIN education_info e ON a.Applicant_ID = e.Applicant_ID
+      LEFT JOIN job_info j ON a.Applicant_ID = j.Applicant_ID
       WHERE a.Applicant_ID = ?
-    `, [id]);
+    `,
+      [id]
+    );
 
     if (!applications || (applications as any[]).length === 0) {
       return NextResponse.json(
@@ -72,61 +75,73 @@ export async function GET(
     const doc = new PDFDocument();
     const chunks: Buffer[] = [];
 
-    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
-    
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
     // Add content to the PDF
-    doc.fontSize(20).text('Application Form', { align: 'center' });
+    doc.fontSize(20).text("Application Form", { align: "center" });
     doc.moveDown();
 
     // Personal Information
-    doc.fontSize(16).text('Personal Information');
+    doc.fontSize(16).text("Personal Information");
     doc.fontSize(12);
     doc.text(`Name: ${application.Applicant_Name}`);
     doc.text(`Address: ${application.Applicant_Address}`);
     doc.text(`Contact Number: ${application.Contact_Number}`);
     doc.text(`Age: ${application.Age}`);
-    doc.text(`Sex: ${application.Sex === 'M' ? 'Male' : 'Female'}`);
+    doc.text(`Sex: ${application.Sex === "M" ? "Male" : "Female"}`);
     doc.moveDown();
 
     // Application Details
-    doc.fontSize(16).text('Application Details');
+    doc.fontSize(16).text("Application Details");
     doc.fontSize(12);
     doc.text(`Position Applied: ${application.Position_Applied}`);
     doc.text(`Salary Desired: $${application.Salary_Desired}`);
     doc.moveDown();
 
-    // Educational Background
-    doc.fontSize(16).text('Educational Background');
-    doc.fontSize(12);
-    doc.text(`Educational Attainment: ${application.Educational_Attainment}`);
-    doc.text(`Institution: ${application.Institution_Name}`);
-    doc.text(`Year Graduated: ${application.Year_Graduated}`);
-    if (application.Honors) {
-      doc.text(`Honors: ${application.Honors}`);
+    // Educational Background (only if data exists)
+    if (application.Educational_Attainment && application.Institution_Name) {
+      doc.fontSize(16).text("Educational Background");
+      doc.fontSize(12);
+      doc.text(`Educational Attainment: ${application.Educational_Attainment}`);
+      doc.text(`Institution: ${application.Institution_Name}`);
+      if (application.Year_Graduated) {
+        doc.text(`Year Graduated: ${application.Year_Graduated}`);
+      }
+      if (application.Honors) {
+        doc.text(`Honors: ${application.Honors}`);
+      }
+      doc.moveDown();
     }
-    doc.moveDown();
 
-    // Previous Employment
-    doc.fontSize(16).text('Previous Employment');
-    doc.fontSize(12);
-    doc.text(`Company: ${application.Company_Name}`);
-    doc.text(`Location: ${application.Company_Location}`);
-    doc.text(`Position: ${application.Position}`);
-    doc.text(`Salary: $${application.Salary}`);
-    doc.moveDown();
+    // Previous Employment (only if data exists)
+    if (application.Company_Name && application.Position) {
+      doc.fontSize(16).text("Previous Employment");
+      doc.fontSize(12);
+      doc.text(`Company: ${application.Company_Name}`);
+      if (application.Company_Location) {
+        doc.text(`Location: ${application.Company_Location}`);
+      }
+      doc.text(`Position: ${application.Position}`);
+      if (application.Salary) {
+        doc.text(`Salary: $${application.Salary}`);
+      }
+      doc.moveDown();
+    }
 
     // Application Reference
-    doc.fontSize(14).text('Application Reference', { align: 'center' });
+    doc.fontSize(14).text("Application Reference", { align: "center" });
     doc.fontSize(12);
-    doc.text(`Applicant ID: ${application.Applicant_ID}`, { align: 'center' });
-    doc.text(`Control Number: ${application.Control_Number}`, { align: 'center' });
+    doc.text(`Applicant ID: ${application.Applicant_ID}`, { align: "center" });
+    doc.text(`Control Number: ${application.Control_Number}`, {
+      align: "center",
+    });
 
     // Finalize the PDF
     doc.end();
 
     // Wait for the PDF to be generated
     const pdfBuffer = await new Promise<Buffer>((resolve) => {
-      doc.on('end', () => {
+      doc.on("end", () => {
         resolve(Buffer.concat(chunks));
       });
     });
@@ -134,8 +149,8 @@ export async function GET(
     // Return the PDF
     return new NextResponse(pdfBuffer, {
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="application-${application.Applicant_ID}.pdf"`,
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="application-${application.Applicant_ID}.pdf"`,
       },
     });
   } catch (error) {
@@ -145,4 +160,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

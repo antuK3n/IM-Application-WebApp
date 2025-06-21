@@ -8,6 +8,7 @@ export default function SuccessPage() {
   const [applicantId, setApplicantId] = useState<string | null>(null);
   const [controlNumber, setControlNumber] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     // Get the stored values from session storage
@@ -19,12 +20,28 @@ export default function SuccessPage() {
   }, []);
 
   const handleDownloadPDF = async () => {
-    if (!applicantId) return;
+    if (!applicantId) {
+      setDownloadError('Applicant ID not found. Please try submitting the form again.');
+      return;
+    }
+    
     setDownloading(true);
+    setDownloadError(null);
+    
     try {
       const res = await fetch(`/api/applications/${applicantId}/pdf`);
-      if (!res.ok) throw new Error('Failed to download PDF');
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to download PDF (${res.status})`);
+      }
+      
       const blob = await res.blob();
+      
+      if (blob.size === 0) {
+        throw new Error('Generated PDF is empty');
+      }
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -33,8 +50,12 @@ export default function SuccessPage() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+      
+      // Clear any previous errors on successful download
+      setDownloadError(null);
     } catch (err) {
-      alert('Failed to download PDF.');
+      console.error('PDF download error:', err);
+      setDownloadError(err instanceof Error ? err.message : 'Failed to download PDF. Please try again.');
     } finally {
       setDownloading(false);
     }
@@ -87,15 +108,47 @@ export default function SuccessPage() {
               </div>
             </div>
           )}
+          
+          {/* Error message display */}
+          {downloadError && (
+            <div style={{
+              textAlign: 'center',
+              marginBottom: 16,
+              padding: '12px 16px',
+              background: 'rgba(220, 53, 69, 0.2)',
+              border: '1px solid rgba(220, 53, 69, 0.5)',
+              borderRadius: 8,
+              color: '#ff6b6b',
+              width: '100%',
+              fontSize: '0.9rem',
+            }}>
+              {downloadError}
+            </div>
+          )}
+          
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', marginTop: 8 }}>
             {applicantId && (
-              <a
+              <button
                 onClick={handleDownloadPDF}
+                disabled={downloading}
                 className={styles.primary}
-                style={{ cursor: 'pointer', width: '100%', textAlign: 'center', background: '#ffd43b', color: '#062C41', fontWeight: 700, fontSize: '1.08rem', borderRadius: 8, padding: '14px 0', marginBottom: 0 }}
+                style={{ 
+                  cursor: downloading ? 'not-allowed' : 'pointer', 
+                  width: '100%', 
+                  textAlign: 'center', 
+                  background: downloading ? '#6c757d' : '#ffd43b', 
+                  color: '#062C41', 
+                  fontWeight: 700, 
+                  fontSize: '1.08rem', 
+                  borderRadius: 8, 
+                  padding: '14px 0', 
+                  marginBottom: 0,
+                  border: 'none',
+                  opacity: downloading ? 0.7 : 1
+                }}
               >
-                {downloading ? 'Generating...' : 'Download PDF Copy'}
-              </a>
+                {downloading ? 'Generating PDF...' : 'Download PDF Copy'}
+              </button>
             )}
             <Link href="/apply" className={styles.primary} style={{ width: '100%', textAlign: 'center', background: '#e5eaf1', color: '#062C41', fontWeight: 700, fontSize: '1.08rem', borderRadius: 8, padding: '14px 0' }}>
               Submit Another Application
