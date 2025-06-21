@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from './admin.module.css';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Application {
   Applicant_ID: string;
@@ -32,16 +33,26 @@ export default function AdminPage() {
   const [sortField, setSortField] = useState<'Applicant_ID' | 'Applicant_Name'>('Applicant_ID');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const loadingTexts = ['Loading.', 'Loading..', 'Loading...'];
 
   useEffect(() => {
     fetchApplications();
   }, []);
 
+  useEffect(() => {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      setLoadingTextIndex((prev) => (prev + 1) % loadingTexts.length);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [loading]);
+
   const fetchApplications = async () => {
     try {
       const response = await fetch('/api/admin/applications');
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch applications');
       }
@@ -131,20 +142,34 @@ export default function AdminPage() {
   };
 
   const filteredAndSortedApplications = applications
-    .filter(app => 
+    .filter(app =>
       app.Applicant_ID.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.Applicant_Name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       const aValue = a[sortField].toString().toLowerCase();
       const bValue = b[sortField].toString().toLowerCase();
-      return sortDirection === 'asc' 
+      return sortDirection === 'asc'
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue);
     });
 
   if (loading) {
-    return <div className={styles.loading}>Loading applications...</div>;
+    return (
+      <div className={styles.customLoadingScreen}>
+        <div className={styles.loadingLogoWrapper}>
+          <Image
+            src="/logo.png"
+            alt="DOE Logo"
+            width={100}
+            height={100}
+            className={styles.spinningLogo}
+            priority
+          />
+        </div>
+        <div className={styles.loadingText}>{loadingTexts[loadingTextIndex]}</div>
+      </div>
+    );
   }
 
   if (error) {
@@ -154,7 +179,16 @@ export default function AdminPage() {
   return (
     <div className={styles.adminLayout}>
       <aside className={styles.sidebar}>
-
+        <div className={styles.logo} style={{ flexDirection: 'column', alignItems: 'center', marginBottom: 0, width: '100%', textAlign: 'center' }}>
+          <img src="/logo.png" alt="DOE Logo" style={{ width: 40, height: 40, marginBottom: 6 }} />
+          <span style={{ fontSize: '0.65rem', fontWeight: 400, lineHeight: 1.4, color: '#fff', display: 'block', margin: 0, padding: 0 }}>
+            REPUBLIC OF THE PHILIPPINES<br />
+            TAGUIG CITY, PHILIPPINES 1632<br />
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', display: 'block', lineHeight: 1.4, margin: '6px 0 0 0', padding: 0 }}>
+              Department of Energy
+            </span>
+          </span>
+        </div>
         <nav className={styles.navLinks}>
           <Link href="/admin" className={styles.active}>
             <i className="fi fi-br-document"></i>
@@ -181,13 +215,13 @@ export default function AdminPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th 
+              <th
                 onClick={() => handleSort('Applicant_ID')}
                 className={styles.sortableHeader}
               >
                 ID {sortField === 'Applicant_ID' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
-              <th 
+              <th
                 onClick={() => handleSort('Applicant_Name')}
                 className={styles.sortableHeader}
               >
@@ -201,7 +235,7 @@ export default function AdminPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedApplications.map((app) => (
+            {filteredAndSortedApplications.map((app: any) => (
               <tr key={app.Applicant_ID}>
                 <td>{app.Applicant_ID}</td>
                 <td>{app.Applicant_Name}</td>
@@ -212,32 +246,64 @@ export default function AdminPage() {
                   <small>Desired: ${app.Salary_Desired}</small>
                 </td>
                 <td>
-                  {app.Educational_Attainment}
-                  <br />
-                  <small>{app.Institution_Name} ({app.Year_Graduated})</small>
-                  {app.Honors && <br />}
-                  {app.Honors && <small>Honors: {app.Honors}</small>}
+                  {app.education && app.education.length > 0 ? (
+                    <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                      {app.education.map((edu: any, idx: number) => (
+                        <li key={idx}>
+                          <strong>{edu.Educational_Attainment}</strong>
+                          {edu.Institution_Name && (
+                            <> at {edu.Institution_Name}</>
+                          )}
+                          {edu.Year_Graduated && (
+                            <> ({edu.Year_Graduated})</>
+                          )}
+                          {edu.Honors && (
+                            <><br /><small>Honors: {edu.Honors}</small></>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span>None</span>
+                  )}
                 </td>
                 <td>
-                  {app.Position} at {app.Company_Name}
-                  <br />
-                  <small>{app.Company_Location}</small>
-                  <br />
-                  <small>Salary: ${app.Salary}</small>
+                  {app.jobs && app.jobs.length > 0 ? (
+                    <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                      {app.jobs.map((job: any, idx: number) => (
+                        <li key={idx}>
+                          <strong>{job.Position}</strong>
+                          {job.Company_Name && (
+                            <> at {job.Company_Name}</>
+                          )}
+                          {job.Company_Location && (
+                            <><br /><small>{job.Company_Location}</small></>
+                          )}
+                          {job.Salary && (
+                            <><br /><small>Salary: ${job.Salary}</small></>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span>None</span>
+                  )}
                 </td>
                 <td>
-                  <button
-                    onClick={() => handleEdit(app)}
-                    className={styles.editButton}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(app.Applicant_ID)}
-                    className={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
+                  <div className={styles.actions}>
+                    <button
+                      onClick={() => handleEdit(app)}
+                      className={styles.editButton}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(app.Applicant_ID)}
+                      className={styles.deleteButton}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

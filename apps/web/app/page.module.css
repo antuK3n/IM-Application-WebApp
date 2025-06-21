@@ -35,7 +35,6 @@
   margin: 0;
   color: var(--text-primary);
   background: var(--background);
-  transition: color var(--transition-duration) ease;
 }
 
 .themeToggle {
@@ -53,14 +52,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-duration) ease;
-  z-index: 1000;
 }
 
-.themeToggle:hover {
-  transform: scale(1.1);
-  border-color: var(--input-focus-border);
-}
+.themeToggle:hover {}
 
 .main {
   width: 100%;
@@ -88,7 +82,6 @@
   padding: 2px 4px;
   border-radius: 4px;
   font-weight: 600;
-  transition: background-color var(--transition-duration) ease;
 }
 
 .ctas {
@@ -104,7 +97,6 @@
   border: none;
   font-family: inherit;
   border: 1px solid transparent;
-  transition: all var(--transition-duration) ease;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -113,7 +105,6 @@
   line-height: var(--line-height-tight);
   font-weight: 500;
   text-decoration: none;
-  will-change: transform;
 }
 
 .ctas a:focus-visible {
@@ -140,7 +131,6 @@ button.secondary {
   border: none;
   font-family: inherit;
   border: 1px solid transparent;
-  transition: all var(--transition-duration) ease;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -165,36 +155,21 @@ button.secondary {
   align-items: center;
   gap: var(--spacing-xs);
   text-decoration: none;
-  transition: opacity var(--transition-duration) ease;
 }
 
 .footer img {
   flex-shrink: 0;
-  transition: transform var(--transition-duration) ease;
 }
 
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-    transform: translateY(-1px);
-  }
+  a.primary:hover {}
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-    transform: translateY(-1px);
-  }
+  a.secondary:hover {}
 
-  .footer a:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
+  .footer a:hover {}
 
-  .footer a:hover img {
-    transform: scale(1.05);
-  }
+  .footer a:hover img {}
 }
 
 @media (max-width: 768px) {
@@ -237,6 +212,7 @@ button.secondary {
 
 /* Reduce motion if user prefers it */
 @media (prefers-reduced-motion: reduce) {
+
   .ctas a,
   .footer a,
   .footer img {
@@ -252,7 +228,7 @@ button.secondary {
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-xs);
-  border-bottom: 2px solid var(--border-color);
+  /* border-bottom: 2px solid var(--border-color); */
 }
 
 .formContainer {
@@ -282,8 +258,6 @@ button.secondary {
   margin-bottom: var(--spacing-xs);
   padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--border-color);
-  transition: color var(--transition-duration) ease,
-              border-color var(--transition-duration) ease;
 }
 
 .formRow {
@@ -304,7 +278,6 @@ button.secondary {
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--text-secondary);
-  transition: color var(--transition-duration) ease;
 }
 
 .formContainer input,
@@ -317,20 +290,13 @@ button.secondary {
   color: var(--text-primary);
   font-family: inherit;
   font-size: var(--font-size-base);
-  transition: all var(--transition-duration) ease;
 }
 
 .formContainer input:hover,
-.formContainer select:hover {
-  border-color: var(--text-secondary);
-}
+.formContainer select:hover {}
 
 .formContainer input:focus,
-.formContainer select:focus {
-  outline: none;
-  border-color: var(--input-focus-border);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-}
+.formContainer select:focus {}
 
 .formContainer button[type="submit"] {
   margin-top: var(--spacing-md);
@@ -343,17 +309,13 @@ button.secondary {
   font-size: var(--font-size-base);
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-duration) ease;
   width: 100%;
   max-width: 200px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.formContainer button[type="submit"]:hover {
-  background: var(--button-hover);
-  transform: translateY(-1px);
-}
+.formContainer button[type="submit"]:hover {}
 
 .formContainer button[type="submit"]:disabled {
   opacity: 0.7;
@@ -380,7 +342,7 @@ button.secondary {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(90deg, rgba(27,77,126,0.95) 0%, rgba(27,77,126,0.7) 40%, rgba(6,44,65,0.2) 100%);
+  background: linear-gradient(90deg, rgba(27, 77, 126, 0.95) 0%, rgba(27, 77, 126, 0.7) 40%, rgba(6, 44, 65, 0.2) 100%);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -396,7 +358,7 @@ button.secondary {
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   z-index: 3;
 }
 
@@ -413,7 +375,7 @@ button.secondary {
 .location {
   color: #e0e6ed;
   font-size: 1rem;
-  text-align: left;
+  text-align: center;
   margin-bottom: 8px;
   letter-spacing: 0.02em;
 }
@@ -423,7 +385,7 @@ button.secondary {
   font-size: 2.2rem;
   font-weight: 700;
   margin: 0 0 12px 0;
-  text-align: left;
+  text-align: center;
   letter-spacing: 0.01em;
 }
 
@@ -444,7 +406,6 @@ button.secondary {
   border: none;
   border-radius: 6px 6px 0 0;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
 }
 
 .tab.active {
@@ -455,8 +416,11 @@ button.secondary {
 
 .submitBtn {
   display: block;
-  width: 100%;
-  padding: 18px 0;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  padding: 18px 18px;
   background: #e5eaf1;
   color: #222;
   font-size: 1.2rem;
@@ -465,15 +429,10 @@ button.secondary {
   border-radius: 8px;
   text-align: center;
   text-decoration: none;
-  margin-bottom: 12px;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: none !important;
+  margin: 0 0 12px 0 !important;
 }
 
-.submitBtn:hover {
-  background: #ffd43b;
-  color: #1b4d7e;
-}
+.submitBtn:hover {}
 
 .footerText {
   color: #e0e6ed;
@@ -495,9 +454,11 @@ button.secondary {
   .centerCard {
     padding: 18px 2vw 12px 2vw;
   }
+
   .title {
     font-size: 1.3rem;
   }
+
   .logo {
     width: 60px;
     height: 60px;
@@ -524,7 +485,6 @@ button.secondary {
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s;
   outline: none;
   height: 100%;
 }
@@ -538,7 +498,6 @@ button.secondary {
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: color 0.2s;
   outline: none;
   height: 100%;
 }
@@ -552,8 +511,8 @@ button.secondary {
   background: #ffd43b;
   border-radius: 8px;
   z-index: 1;
-  transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
 
 .loginForm {
@@ -587,8 +546,6 @@ button.secondary {
   border-radius: 8px;
   text-align: left;
   margin-bottom: 12px;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: none;
   outline: none;
 }
 
@@ -605,101 +562,28 @@ button.secondary {
   color: #1b4d7e;
 }
 
+.visible,
+.hidden,
+.animatedFormSection,
+.animatedContent,
+.applicantActive .loginForm,
+.adminActive .loginForm,
+.applicantActive .submitBtn,
+.adminActive .submitBtn,
+.tab,
+.tabActive,
+.tabIndicator {
+  transition: none !important;
+}
+
 .visible {
-  opacity: 1;
-  max-height: 400px;
-  transform: scaleY(1);
-  pointer-events: auto;
-  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), max-height 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: block !important;
 }
 
 .hidden {
-  opacity: 0;
-  max-height: 0;
-  transform: scaleY(0.95);
-  pointer-events: none;
-  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), max-height 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: none !important;
 }
 
 .animatedFormSection {
   width: 100%;
-  margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
 }
-
-.animatedContent {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
-  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-
-.applicantActive .animatedContent {
-  opacity: 1;
-  transform: scaleY(1);
-  height: 64px;
-}
-
-.adminActive .animatedContent {
-  opacity: 1;
-  transform: scaleY(1);
-  height: 220px;
-}
-
-.animating .animatedContent {
-  opacity: 0.5;
-  transform: scaleY(0.95);
-}
-
-.loginForm {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  margin: 0;
-  padding: 0;
-}
-
-.applicantActive .loginForm {
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-  margin: 0;
-  padding: 0;
-  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
-              opacity 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-
-.adminActive .loginForm {
-  max-height: 400px;
-  opacity: 1;
-  pointer-events: auto;
-  margin-top: 0 rem;
-  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
-              opacity 0.35s cubic-bezier(0.4,0,0.2,1),
-              margin-top 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-
-.applicantActive .submitBtn {
-  max-height: 100px;
-  opacity: 1;
-  pointer-events: auto;
-  margin: 0;
-  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
-              opacity 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-
-.adminActive .submitBtn {
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-  margin: 0;
-  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), 
-              opacity 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-

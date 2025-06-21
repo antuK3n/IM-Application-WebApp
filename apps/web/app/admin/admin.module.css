@@ -119,8 +119,12 @@
 }
 
 .table th {
-  background-color: #062C41;
+  background-color: #021521;
   font-weight: 600;
+}
+
+.table tr {
+  background-color: #1B4D7E;
 }
 
 .table tr:hover {
@@ -296,7 +300,7 @@
   padding: 0.5rem;
   border: 1px solid #333;
   border-radius: 4px;
-  background-color: #222;
+  background-color: #001C31;
   color: #fff;
 }
 
@@ -314,4 +318,101 @@
 
 .sortableHeader:hover {
   background-color: #333;
-} 
+}
+
+.sidebar:hover .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sidebar:hover .actions .editButton,
+.sidebar:hover .actions .deleteButton {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  display: inline-block;
+  text-align: center;
+  margin-right: 0 !important;
+}
+
+.customLoadingScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #021521 0%, #1B4D7E 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 2000;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+.customLoadingScreen.fadeOut {
+  animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.loadingLogoWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.spinningLogo {
+  animation: spin 1.2s linear infinite;
+  filter: drop-shadow(0 0 16px #fff8) drop-shadow(0 0 32px #1B4D7E88);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.1em;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}

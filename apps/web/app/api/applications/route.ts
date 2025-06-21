@@ -37,7 +37,7 @@ export async function POST(request: Request) {
           ApplicantForm_ID, Applicant_ID, Control_Number, Position_Applied, Salary_Desired
         ) VALUES (?, ?, ?, ?, ?)`,
         [
-          newApplicantId,
+          newApplicantId, // 01A -
           newApplicantId,
           controlNumber,
           data.positionApplied,
@@ -45,35 +45,41 @@ export async function POST(request: Request) {
         ]
       );
 
-      await connection.execute(
-        `INSERT INTO education_info (
-          Student_ID, Applicant_ID, Educational_Attainment, Institution_Name, 
-          Year_Graduated, Honors
-        ) VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          newApplicantId,
-          newApplicantId,
-          data.educationalAttainment,
-          data.institutionName,
-          data.yearGraduated,
-          data.honors || null,
-        ]
-      );
+      // Only insert education_info if data is present
+      if (data.educationalAttainment && data.studentId && data.institutionName && data.yearGraduated) {
+        await connection.execute(
+          `INSERT INTO education_info (
+            Student_ID, Applicant_ID, Educational_Attainment, Institution_Name, 
+            Year_Graduated, Honors
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            data.studentId,
+            newApplicantId,
+            data.educationalAttainment,
+            data.institutionName,
+            data.yearGraduated,
+            data.honors || null,
+          ]
+        );
+      }
 
-      await connection.execute(
-        `INSERT INTO job_info (
-          Employment_ID, Applicant_ID, Company_Name, Company_Location, 
-          Position, Salary
-        ) VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          newApplicantId,
-          newApplicantId,
-          data.companyName,
-          data.companyLocation,
-          data.position,
-          data.salary,
-        ]
-      );
+      // Only insert job_info if data is present
+      if (data.companyName && data.companyLocation && data.position && data.salary) {
+        await connection.execute(
+          `INSERT INTO job_info (
+            Employment_ID, Applicant_ID, Company_Name, Company_Location, 
+            Position, Salary
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            newApplicantId, // user input
+            newApplicantId,
+            data.companyName,
+            data.companyLocation,
+            data.position,
+            data.salary,
+          ]
+        );
+      }
 
       await connection.commit();
 

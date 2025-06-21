@@ -6,7 +6,8 @@ export async function GET() {
     const connection = await pool.getConnection();
 
     try {
-      const [applications] = await connection.execute(`
+      // Fetch all applicants with their application info
+      const [applicants] = await connection.execute(`
         SELECT 
           a.Applicant_ID,
           a.Applicant_Name,
@@ -16,21 +17,30 @@ export async function GET() {
           a.Sex,
           app.Control_Number,
           app.Position_Applied,
-          app.Salary_Desired,
-          e.Educational_Attainment,
-          e.Institution_Name,
-          e.Year_Graduated,
-          e.Honors,
-          j.Company_Name,
-          j.Company_Location,
-          j.Position,
-          j.Salary
+          app.Salary_Desired
         FROM applicant_info a
         JOIN application_info app ON a.Applicant_ID = app.Applicant_ID
-        JOIN education_info e ON a.Applicant_ID = e.Applicant_ID
-        JOIN job_info j ON a.Applicant_ID = j.Applicant_ID
         ORDER BY a.Applicant_ID DESC
       `);
+
+      // For each applicant, fetch their education and job info as arrays
+      const applications = await Promise.all((applicants as any[]).map(async (applicant) => {
+        // Fetch education
+        const [education] = await connection.execute(
+          `SELECT Educational_Attainment, Institution_Name, Year_Graduated, Honors FROM education_info WHERE Applicant_ID = ?`,
+          [applicant.Applicant_ID]
+        );
+        // Fetch jobs
+        const [jobs] = await connection.execute(
+          `SELECT Company_Name, Company_Location, Position, Salary FROM job_info WHERE Applicant_ID = ?`,
+          [applicant.Applicant_ID]
+        );
+        return {
+          ...applicant,
+          education: education as any[],
+          jobs: jobs as any[],
+        };
+      }));
 
       return NextResponse.json({ applications });
     } finally {

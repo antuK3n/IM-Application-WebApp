@@ -60,8 +60,8 @@ export default function Home() {
             priority
           />
           <div className={styles.headerText}>
-            <div className={styles.location}>REPUBLIC OF THE sorry nalulupitan ako first time frontend hawhdawd<br />TAGUIG CITY, PHILIPPINES 1632</div>
-            <h1 className={styles.title}>Department of inaayos pa wait</h1>
+            <div className={styles.location}>REPUBLIC OF THE PHILIPPINES<br />TAGUIG CITY, PHILIPPINES 1632</div>
+            <h1 className={styles.title}>Department of Energy</h1>
           </div>
           <div className={styles.tabToggle}>
             <button
@@ -121,12 +121,15 @@ export default function Home() {
               </button>
             </form>
           </div>
-          <div className={styles.footerText}>
-            Pasa mo...
-            God is giving u 600 million angel to take care of u.
-            Share them to 9 close to ur heart except sken.
-            You wil hav gud news in 10 mins.
-            Ngtry ako totoo...
+          <div className={styles.footerText} style={{ textAlign: 'center' }}>
+            By using this service, you understood and agree to the<br />
+            <a href="https://example.com" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'underline' }}>
+              Department of Energy Services Terms of Use and Privacy Statement
+            </a>
+            <br /><br />
+            <span style={{ fontSize: '0.95rem', color: '#fff' }}>
+              This project is open source. View the codebase on <a href="https://github.com/antuK3n/IM-Application-WebApp" target="_blank" rel="noopener noreferrer" style={{ color: '#ffd43b', textDecoration: 'underline' }}>GitHub</a>.
+            </span>
           </div>
         </div>
       </div>
